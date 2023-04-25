@@ -2,11 +2,11 @@ package in.codifi.api.repository;
 
 import java.util.List;
 
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import in.codifi.api.entity.ApplicationUserEntity;
 
-public interface ApplicationUserRepository extends CrudRepository<ApplicationUserEntity, Long> {
+public interface ApplicationUserRepository extends JpaRepository<ApplicationUserEntity, Long> {
 
-	List<ApplicationUserEntity> findByIdBetween(long startId, long endId);
+	List<ApplicationUserEntity> findByIdBetween(long startId, long endId);	
 }

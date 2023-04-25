@@ -124,6 +124,10 @@
 			<version>${dependency-check-core-version}</version>
 		</dependency>
 		<dependency>
+			<groupId>io.quarkus</groupId>
+			<artifactId>quarkus-mailer</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.owasp</groupId>
 			<artifactId>dependency-check-utils</artifactId>
 			<version>${dependency-check-core-version}</version>

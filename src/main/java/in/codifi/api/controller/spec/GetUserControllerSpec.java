@@ -12,10 +12,11 @@ import org.wildfly.common.annotation.NotNull;
 
 import in.codifi.api.response.model.ResponseModel;
 
-public interface AdminControllerSpec {
+public interface GetUserControllerSpec {
+
 	
 	/**
-	 * Method to save Bank Details
+	 * Method to select Userdetails
 	 * 
 	 * @author VENNILA
 	 * @param 
