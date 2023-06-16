@@ -5,6 +5,6 @@ import in.codifi.api.entity.DocumentEntity;
 
 public interface DocumentEntityRepository extends JpaRepository<DocumentEntity, Long> {
 
-	DocumentEntity findByApplicationIdAndDocumentType(long id, String docType);
+	DocumentEntity findByApplicationIdAndDocumentType(long applicationId, String documentType);
 
 }
