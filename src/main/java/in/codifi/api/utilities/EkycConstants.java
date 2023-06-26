@@ -7,4 +7,5 @@ public class EkycConstants {
 	public static final String OS_WINDOWS = "win";
 	
 	public static final String DOC_IVR = "IPV";
+	public static final String DOC_ESIGN = "ESIGN";
 }

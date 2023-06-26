@@ -7,11 +7,14 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.Response;
+
 import in.codifi.api.config.ApplicationProperties;
 import in.codifi.api.entity.DocumentEntity;
 import in.codifi.api.entity.IvrEntity;
+import in.codifi.api.entity.TxnDetailsEntity;
 import in.codifi.api.repository.DocumentEntityRepository;
 import in.codifi.api.repository.IvrRepository;
+import in.codifi.api.repository.TxnDetailsRepository;
 import in.codifi.api.service.spec.IDocDownloadService;
 import in.codifi.api.utilities.CommonMethods;
 import in.codifi.api.utilities.EkycConstants;
@@ -35,7 +38,8 @@ public class DocDownloadService implements IDocDownloadService {
 	
 	@Inject
 	IvrRepository ivrRepository;
-	
+	@Inject
+	TxnDetailsRepository txnDetailsRepository;
 	/**
 	 * Method to download file
 	 */
@@ -58,8 +62,18 @@ public class DocDownloadService implements IDocDownloadService {
 	                        .build();
 	            }
 	            attachmentType = ivrEntity.getAttachement();
-	        } else {
-	            DocumentEntity document = docrepository.findByApplicationIdAndDocumentType(applicationId, type);
+	        } else if(type.equalsIgnoreCase(EkycConstants.DOC_ESIGN)) {
+	        	String TxnDetailsEntityFile=txnDetailsRepository.findsinglefilefolder(applicationId);
+	        	if(TxnDetailsEntityFile!=null) {
+	        	  return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+	                        .entity(MessageConstants.FILE_NOT_FOUND)
+	                        .build();
+	        	}
+	        	int lastIndex = TxnDetailsEntityFile.lastIndexOf("\\");
+	        	 attachmentType = TxnDetailsEntityFile.substring(lastIndex + 1);
+	        	
+	        }else {
+	        	DocumentEntity document = docrepository.findByApplicationIdAndDocumentType(applicationId, type);
 	            if (document == null) {
 	                return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
 	                        .entity(MessageConstants.FILE_NOT_FOUND)
