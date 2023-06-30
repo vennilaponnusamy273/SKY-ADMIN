@@ -1,12 +1,21 @@
 package in.codifi.api.utilities;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import in.codifi.api.config.ApplicationProperties;
 import in.codifi.api.entity.EmailTemplateEntity;
 import in.codifi.api.entity.ErrorLogEntity;
 import in.codifi.api.repository.EmailTemplateRepository;
 import in.codifi.api.repository.ErrorLogRepository;
+import in.codifi.api.request.model.BankAddressModel;
 import in.codifi.api.response.model.ResponseModel;
 
 import io.quarkus.mailer.Mail;
@@ -20,6 +29,9 @@ public class CommonMethods {
 	
 	@Inject
 	Mailer mailer;
+	
+	@Inject
+	ApplicationProperties props;
 	
 	@Inject
 	ErrorLogRepository errorLogRepository;
@@ -69,5 +81,34 @@ public class CommonMethods {
 	        mailer.send(mail);
 	        System.out.println("The email was sent in error message: " + mail);
 	    }
+	}
+	
+	/**
+	 * Method to find bank address by ifsc
+	 * 
+	 * @author Vennila
+	 * @param ifscCode
+	 * @return
+	 */
+	public BankAddressModel findBankAddressByIfsc(String ifscCode) {
+		BankAddressModel model = null;
+		try {
+			URL url = new URL(props.getRazorpayIfscUrl() + ifscCode);
+			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+			conn.setRequestMethod("GET");
+			conn.setRequestProperty("Accept", "application/json");
+			if (conn.getResponseCode() != 200) {
+				return model;
+			}
+			BufferedReader br1 = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+			String output;
+			while ((output = br1.readLine()) != null) {
+				ObjectMapper om = new ObjectMapper();
+				model = om.readValue(output, BankAddressModel.class);
+			}
+		} catch (Exception e) {
+			return model;
+		}
+		return model;
 	}
 }

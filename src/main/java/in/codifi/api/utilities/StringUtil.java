@@ -13,4 +13,12 @@ public class StringUtil {
 			return true;
 		}
 	}
+	
+	public static boolean isEqual(String str1, String str2) {
+		boolean isEqual = false;
+		if (str1 != null && str2 != null && str1.equalsIgnoreCase(str2)) {
+			isEqual = true;
+		}
+		return isEqual;
+	}
 }
