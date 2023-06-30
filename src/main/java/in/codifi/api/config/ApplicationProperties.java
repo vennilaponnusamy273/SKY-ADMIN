@@ -16,4 +16,6 @@ public class ApplicationProperties {
 	
 	@ConfigProperty(name = "appconfig.file.basepath")
 	String fileBasePath;
+	@ConfigProperty(name = "appconfig.razorpay.ifsc")
+	String razorpayIfscUrl;
 }

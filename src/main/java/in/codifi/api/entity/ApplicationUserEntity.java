@@ -17,7 +17,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity(name = "tbl_application_master")
-public class ApplicationUserEntity  implements Serializable {
+public class ApplicationUserEntity extends CommonEntity implements Serializable {
 
 	/**
 	 * 
@@ -76,7 +76,13 @@ public class ApplicationUserEntity  implements Serializable {
 
 	@Column(name = "status")
 	private String status;
+	
+	@Column(name = "esign_completed")
+	private int esignCompleted = 0;
 
+	@Column(name = "pdf_generated")
+	private Integer  pdfGenerated = 0;
+	
 	@Column(name = "pan_confirm")
 	private int panConfirm;
 
