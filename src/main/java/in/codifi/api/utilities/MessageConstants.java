@@ -28,4 +28,5 @@ public class MessageConstants {
 	public static final String DOC_REJECTED = "DOCUMENT REJECTED SUCCESSFULLY";
 	public static final String ERROR_WHILE_SAVING_DOCSTATUS = "Error Occur form saving Document status";
 	public static final String NOT_DOC_AVAILABLE = "Document Details Not Available in User Document  Details";
+	public static final String INVLAID_PARAMETER = "The Given Parameter is Invalid";
 }
