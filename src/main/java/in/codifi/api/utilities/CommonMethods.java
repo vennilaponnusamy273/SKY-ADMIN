@@ -4,9 +4,12 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.mail.MessagingException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -29,7 +32,8 @@ public class CommonMethods {
 	
 	@Inject
 	Mailer mailer;
-	
+	@Inject
+	CommonMail commonMail;
 	@Inject
 	ApplicationProperties props;
 	
@@ -110,5 +114,21 @@ public class CommonMethods {
 			return model;
 		}
 		return model;
+	}
+
+	/**
+	 * Method to send IPV Link to email
+	 * 
+	 * @param Url
+	 * @param mobileNumber
+	 */
+	public void sendRejectionMail(String userName, String emailId) throws MessagingException {
+		EmailTemplateEntity emailTempentity = emailTemplateRepository.findByKeyData("Rejection");
+		String body_Message = emailTempentity.getBody();
+		String body = body_Message.replace("{UserName}", userName);
+		String subject = emailTempentity.getSubject();
+		List<String> toAdd = new ArrayList<>();
+		toAdd.add(emailId);
+		commonMail.sendMail(toAdd, subject, body);
 	}
 }
