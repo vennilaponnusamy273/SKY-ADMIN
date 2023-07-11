@@ -17,7 +17,10 @@ public class AdminController implements IAdminController {
 	IAdminService adminService;
 	@Inject
 	CommonMethods commonMethods;
-	
+
+	/**
+	 * Method to send mail on Esign Users
+	 */
 	@Override
 	public ResponseModel sendRejectionMail(@NotNull long applicationId, boolean confirmMail) {
 		ResponseModel responseModel = null;
@@ -25,6 +28,20 @@ public class AdminController implements IAdminController {
 			responseModel = adminService.sendRejectionMail(applicationId, confirmMail);
 		} else {
 			responseModel = commonMethods.constructFailedMsg(MessageConstants.INVLAID_PARAMETER);
+		}
+		return responseModel;
+	}
+
+	/**
+	 * Method to initiaze push to back office
+	 */
+	@Override
+	public ResponseModel pushBO(long applicationId) {
+		ResponseModel responseModel = null;
+		if (applicationId > 0) {
+			responseModel = adminService.pushBO(applicationId);
+		} else {
+			responseModel = commonMethods.constructFailedMsg(MessageConstants.USER_ID_NULL);
 		}
 		return responseModel;
 	}

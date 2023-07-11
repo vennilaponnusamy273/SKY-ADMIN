@@ -17,7 +17,7 @@ import in.codifi.api.utilities.CommonMethods;
 import in.codifi.api.utilities.EkycConstants;
 
 @ApplicationScoped
-public class AdminService implements IAdminService{
+public class AdminService implements IAdminService {
 
 	@Inject
 	ApplicationUserRepository applicationUserRepository;
@@ -25,6 +25,7 @@ public class AdminService implements IAdminService{
 	CheckApiRepository apiRepository;
 	@Inject
 	CommonMethods commonMethods;
+
 	@Override
 	public ResponseModel sendRejectionMail(@NotNull long applicationId, boolean confirmMail) {
 		ResponseModel responseModel = new ResponseModel();
@@ -58,6 +59,30 @@ public class AdminService implements IAdminService{
 				responseModel.setReason("Mail sending confirmation value is false");
 			}
 		}
+		return responseModel;
+	}
+
+	/**
+	 * Method to initiaze push to back office
+	 */
+	@Override
+	public ResponseModel pushBO(@NotNull long applicationId) {
+		ResponseModel responseModel = new ResponseModel();
+		CheckApiEntity apiEntity = apiRepository.findByapplicationId(applicationId);
+		if (apiEntity == null) {
+			apiEntity = new CheckApiEntity();
+			apiEntity.setStartStatus(1l);
+			apiEntity.setApplicationId(applicationId);
+			// TODO push to back office
+		} else {
+			long count = apiEntity.getStartStatus();
+			apiEntity.setStartStatus(count + 1);
+		}
+		apiRepository.save(apiEntity);
+		responseModel = new ResponseModel();
+		responseModel.setMessage(EkycConstants.SUCCESS_MSG);
+		responseModel.setStat(EkycConstants.SUCCESS_STATUS);
+		responseModel.setReason("Back Office push started successfully");
 		return responseModel;
 	}
 }
