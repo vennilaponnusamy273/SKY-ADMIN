@@ -8,6 +8,7 @@ import in.codifi.api.response.model.ResponseModel;
 import in.codifi.api.service.spec.IAdminService;
 import in.codifi.api.utilities.CommonMethods;
 import in.codifi.api.utilities.MessageConstants;
+import in.codifi.api.utilities.StringUtil;
 import io.smallrye.common.constraint.NotNull;
 
 @Path("/admin")
@@ -42,6 +43,24 @@ public class AdminController implements IAdminController {
 			responseModel = adminService.pushBO(applicationId);
 		} else {
 			responseModel = commonMethods.constructFailedMsg(MessageConstants.USER_ID_NULL);
+		}
+		return responseModel;
+	}
+	
+	/**
+	 * method to get ifsc
+	 * 
+	 * @author SOWMIYA
+	 * 
+	 * @param bankEntity
+	 * @return
+	 */
+	public ResponseModel getIfsc(String ifscCode) {
+		ResponseModel responseModel = new ResponseModel();
+		if (StringUtil.isNotNullOrEmpty(ifscCode)) {
+			responseModel = adminService.getIfsc(ifscCode);
+		} else {
+			responseModel = commonMethods.constructFailedMsg(MessageConstants.PARAMETER_NULL);
 		}
 		return responseModel;
 	}

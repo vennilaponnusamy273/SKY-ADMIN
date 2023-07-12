@@ -1,5 +1,6 @@
 package in.codifi.api.controller.spec;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -40,4 +41,10 @@ public interface IAdminController {
 	@Produces(MediaType.APPLICATION_JSON)
 	@APIResponse(description = "Method to dcheck trackWizz")
 	public ResponseModel pushBO(@NotNull @QueryParam("applicationId") long applicationId);
+	
+	@GET
+	@Path("/getIfsc")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public ResponseModel getIfsc(@NotNull @QueryParam("ifscCode") String ifscCode);
 }

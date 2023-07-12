@@ -34,4 +34,5 @@ public class MessageConstants {
 	public static final String STATUSNOTFOUND = "Status not found for the given application and stage.";
 	public static final String STAGENOTFOUND = "Given Stage is Invaild";
 	public static final String USER_ID_INVALID = "The given user Id is Invalid";
+	public static final String IFSC_INVALID = "The given user IFSC Code is Invalid";
 }

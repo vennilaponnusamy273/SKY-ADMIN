@@ -11,10 +11,12 @@ import in.codifi.api.entity.ApplicationUserEntity;
 import in.codifi.api.entity.CheckApiEntity;
 import in.codifi.api.repository.ApplicationUserRepository;
 import in.codifi.api.repository.CheckApiRepository;
+import in.codifi.api.request.model.BankAddressModel;
 import in.codifi.api.response.model.ResponseModel;
 import in.codifi.api.service.spec.IAdminService;
 import in.codifi.api.utilities.CommonMethods;
 import in.codifi.api.utilities.EkycConstants;
+import in.codifi.api.utilities.MessageConstants;
 
 @ApplicationScoped
 public class AdminService implements IAdminService {
@@ -83,6 +85,30 @@ public class AdminService implements IAdminService {
 		responseModel.setMessage(EkycConstants.SUCCESS_MSG);
 		responseModel.setStat(EkycConstants.SUCCESS_STATUS);
 		responseModel.setReason("Back Office push started successfully");
+		return responseModel;
+	}
+
+	/**
+	 * method to get ifsc
+	 * 
+	 * @author SOWMIYA
+	 * 
+	 */
+	@Override
+	public ResponseModel getIfsc(@NotNull String ifscCode) {
+		ResponseModel responseModel = new ResponseModel();
+		try {
+			BankAddressModel model = commonMethods.findBankAddressByIfsc(ifscCode);
+			if (model != null) {
+				responseModel.setMessage(EkycConstants.SUCCESS_MSG);
+				responseModel.setStat(EkycConstants.SUCCESS_STATUS);
+				responseModel.setResult(model);
+			} else {
+				responseModel = commonMethods.constructFailedMsg(MessageConstants.IFSC_INVALID);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		return responseModel;
 	}
 }

@@ -16,4 +16,6 @@ public interface IAdminService {
 	 * @return
 	 */
 	ResponseModel pushBO(@NotNull long applicationId);
+	
+	ResponseModel getIfsc(@NotNull String ifscCode);
 }
