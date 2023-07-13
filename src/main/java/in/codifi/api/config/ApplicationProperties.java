@@ -29,4 +29,18 @@ public class ApplicationProperties {
 	String mailUserName;
 	@ConfigProperty(name = "appconfig.mail.host")
 	String mailHost;
+	
+	@ConfigProperty(name = "appconfig.sms.url")
+	String smsUrl;
+	@ConfigProperty(name = "appconfig.sms.feedid")
+	String smsFeedId;
+	@ConfigProperty(name = "appconfig.sms.senderid")
+	String smsSenderId;
+	@ConfigProperty(name = "appconfig.sms.username")
+	String smsUserName;
+	@ConfigProperty(name = "appconfig.sms.text")
+	String smsText;
+	@ConfigProperty(name = "appconfig.sms.password")
+	String smsPassword;
+	
 }
