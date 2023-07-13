@@ -17,13 +17,13 @@ import in.codifi.api.repository.ApplicationUserRepository;
 import in.codifi.api.repository.nodifyRepository;
 import in.codifi.api.response.model.ResponseModel;
 import in.codifi.api.restservice.ISmsRestService;
-import in.codifi.api.service.spec.InodifyService;
+import in.codifi.api.service.spec.InotifyService;
 import in.codifi.api.utilities.CommonMail;
 import in.codifi.api.utilities.CommonMethods;
 import in.codifi.api.utilities.MessageConstants;
 
 @ApplicationScoped
-public class nodifyService implements InodifyService  {
+public class notifyService implements InotifyService  {
 
 	private static final Logger logger = LogManager.getLogger(GetUserService.class);
 	

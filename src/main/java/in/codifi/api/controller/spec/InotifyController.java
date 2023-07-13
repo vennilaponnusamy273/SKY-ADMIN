@@ -9,7 +9,7 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import in.codifi.api.entity.notifyEntity;
 import in.codifi.api.response.model.ResponseModel;
 
-public interface InodifyController {
+public interface InotifyController {
 
 	/**
 	 * Method to nodify user to Mail and Message
