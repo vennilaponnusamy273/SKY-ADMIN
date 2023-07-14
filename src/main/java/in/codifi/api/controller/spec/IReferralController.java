@@ -6,18 +6,18 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
-import in.codifi.api.entity.notifyEntity;
+import in.codifi.api.entity.ReferralEntity;
 import in.codifi.api.response.model.ResponseModel;
 
-public interface InotifyController {
+public interface IReferralController {
 
 	/**
 	 * Method to nodify user to Mail and Message
 	 **/
 
-	@Path("/setNodify")
+	@Path("/setReferral")
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@APIResponse(description = " Method to nodify user to Mail and Message")
-	public ResponseModel nodifyUser(notifyEntity NotifyEntity);
+	public ResponseModel notifyUser(ReferralEntity NotifyEntity);
 }

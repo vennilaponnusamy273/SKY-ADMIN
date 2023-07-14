@@ -12,10 +12,10 @@ import javax.persistence.Id;
 import lombok.Getter;
 import lombok.Setter;
 
-@Entity(name = "tbl_nodify_details")
+@Entity(name = "tbl_referral_details")
 @Getter
 @Setter
-public class notifyEntity extends CommonEntity implements Serializable {
+public class ReferralEntity extends CommonEntity implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	@Id
