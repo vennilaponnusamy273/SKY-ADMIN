@@ -6,11 +6,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.mail.MessagingException;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import in.codifi.api.config.ApplicationProperties;
@@ -20,7 +18,6 @@ import in.codifi.api.repository.EmailTemplateRepository;
 import in.codifi.api.repository.ErrorLogRepository;
 import in.codifi.api.request.model.BankAddressModel;
 import in.codifi.api.response.model.ResponseModel;
-
 import io.quarkus.mailer.Mail;
 import io.quarkus.mailer.Mailer;
 
@@ -130,5 +127,5 @@ public class CommonMethods {
 		List<String> toAdd = new ArrayList<>();
 		toAdd.add(emailId);
 		commonMail.sendMail(toAdd, subject, body);
-	}
+	}	
 }
