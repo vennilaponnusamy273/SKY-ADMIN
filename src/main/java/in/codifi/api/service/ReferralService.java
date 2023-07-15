@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,8 +13,10 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import in.codifi.api.config.ApplicationProperties;
 import in.codifi.api.entity.ApplicationUserEntity;
+import in.codifi.api.entity.EmailTemplateEntity;
 import in.codifi.api.entity.ReferralEntity;
 import in.codifi.api.repository.ApplicationUserRepository;
+import in.codifi.api.repository.EmailTemplateRepository;
 import in.codifi.api.repository.ReferralRepository;
 import in.codifi.api.response.model.ResponseModel;
 import in.codifi.api.restservice.ISmsRestService;
@@ -41,9 +44,11 @@ public class ReferralService implements IReferralService {
 	@Inject
 	@RestClient
 	ISmsRestService ismsRestService;
+	@Inject
+	EmailTemplateRepository emailTemplateRepository;
 
 	@Override
-	public ResponseModel notifyUser(ReferralEntity NotifyEntity) {
+	public ResponseModel setReferral(ReferralEntity NotifyEntity) {
 		ResponseModel response = new ResponseModel();
 		try {
 			ApplicationUserEntity applicationUserEntity = applicationUserRepository
@@ -52,16 +57,20 @@ public class ReferralService implements IReferralService {
 				ReferralEntity existingNotifyEntity = notifyRepository.findByMobileNo(NotifyEntity.getMobileNo());
 				if (existingNotifyEntity == null) {
 					if (NotifyEntity.getMobileNo() != null && NotifyEntity.getMobileNo() > 0) {
-						NotifyEntity.setEmailId(NotifyEntity.getEmailId());
-						NotifyEntity.setIsNodify(1);
-						NotifyEntity.setMobileNo(NotifyEntity.getMobileNo());
-						NotifyEntity.setReferralName(NotifyEntity.getReferralName());
+						NotifyEntity.setUrl(MessageConstants.EKYC_URL + NotifyEntity.getReferralBy());
 						notifyRepository.save(NotifyEntity);
 						sendMessagetoMobile("test", NotifyEntity.getMobileNo());
 						if (StringUtil.isNotNullOrEmpty(NotifyEntity.getEmailId())) {
-							List<String> toAdd = new ArrayList<>();
-							toAdd.add(NotifyEntity.getEmailId());
-							commonMail.sendMail(toAdd, "test", "test");
+							EmailTemplateEntity emailTemplateEntity = emailTemplateRepository.findByKeyData("referral");
+							if (emailTemplateEntity != null && emailTemplateEntity.getBody() != null
+									&& emailTemplateEntity.getSubject() != null) {
+								List<String> toAdd = new ArrayList<>();
+								toAdd.add(NotifyEntity.getEmailId());
+								String bodyMessage = emailTemplateEntity.getBody();
+//								String body = bodyMessage.replace("{UserName}", name);
+								String subject = emailTemplateEntity.getSubject();
+								commonMail.sendMail(toAdd, subject, bodyMessage);
+							}
 						}
 						response.setStat(MessageConstants.SUCCESS_STATUS);
 						response.setMessage(MessageConstants.SUCCESS_MSG);
@@ -103,5 +112,54 @@ public class ReferralService implements IReferralService {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	/**
+	 * Method to nodify user to Mail and Message
+	 */
+	@Override
+	public ResponseModel notifyUser(@NotNull long id, @NotNull String referralId) {
+		ResponseModel response = new ResponseModel();
+		ReferralEntity existingNotifyEntity = notifyRepository.findByIdAndReferralBy(id, referralId);
+		if (existingNotifyEntity != null) {
+			sendMessagetoMobile("url", existingNotifyEntity.getMobileNo());
+			if (StringUtil.isNotNullOrEmpty(existingNotifyEntity.getEmailId())) {
+				if (StringUtil.isNotNullOrEmpty(existingNotifyEntity.getEmailId())) {
+					EmailTemplateEntity emailTemplateEntity = emailTemplateRepository.findByKeyData("referral");
+					if (emailTemplateEntity != null && emailTemplateEntity.getBody() != null
+							&& emailTemplateEntity.getSubject() != null) {
+						List<String> toAdd = new ArrayList<>();
+						toAdd.add(existingNotifyEntity.getEmailId());
+						String bodyMessage = emailTemplateEntity.getBody();
+						String body = bodyMessage.replace("{otp}", existingNotifyEntity.getUrl());
+						String subject = emailTemplateEntity.getSubject();
+						commonMail.sendMail(toAdd, subject, body);
+						response.setStat(MessageConstants.SUCCESS_STATUS);
+						response.setMessage(MessageConstants.SUCCESS_MSG);
+						response.setReason("Notification Successfully Sent..!");
+					}
+				}
+			}
+		} else {
+			response = commonMethods.constructFailedMsg(MessageConstants.INVLAID_PARAMETER);
+		}
+		return response;
+	}
+
+	/**
+	 * get Referral Record by referral Id
+	 */
+	@Override
+	public ResponseModel getRecordByUser(@NotNull String referralId) {
+		ResponseModel response = new ResponseModel();
+		List<ReferralEntity> ReferralEntities = notifyRepository.findByReferralBy(referralId);
+		if (StringUtil.isListNotNullOrEmpty(ReferralEntities)) {
+			response.setStat(MessageConstants.SUCCESS_STATUS);
+			response.setMessage(MessageConstants.SUCCESS_MSG);
+			response.setResult(ReferralEntities);
+		} else {
+			response = commonMethods.constructFailedMsg(MessageConstants.NO_RECORD_FOUND);
+		}
+		return response;
 	}
 }
