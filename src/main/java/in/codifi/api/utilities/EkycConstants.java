@@ -51,4 +51,7 @@ public class EkycConstants {
 	public static final String PAGE_PDFDOWNLOAD = "11";
 	public static final String PAGE_ESIGN = "12";
 	public static final String PAGE_COMPLETED_EMAIL_ATTACHED = "13";
+	
+	public static final String URL = "url";
+	public static final String SHORT_URL = "shortLink";
 }

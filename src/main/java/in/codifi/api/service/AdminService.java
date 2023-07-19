@@ -46,14 +46,14 @@ public class AdminService implements IAdminService {
 				}
 				apiRepository.save(apiEntity);
 				try {
-					commonMethods.sendRejectionMail(userEntity.get().getUserName(), userEntity.get().getEmailId());
+					commonMethods.sendRejectionMail(userEntity.get().getUserName(), userEntity.get().getEmailId(),applicationId);
 				} catch (MessagingException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				responseModel.setMessage(EkycConstants.SUCCESS_MSG);
 				responseModel.setStat(EkycConstants.SUCCESS_STATUS);
-				responseModel.setResult("Mail sent successfully");
+				responseModel.setReason("Mail sent successfully");
 			} else {
 				// confirmMail is false (0)
 				responseModel.setMessage(EkycConstants.SUCCESS_MSG);
@@ -63,6 +63,7 @@ public class AdminService implements IAdminService {
 		}
 		return responseModel;
 	}
+
 
 	/**
 	 * Method to initiaze push to back office

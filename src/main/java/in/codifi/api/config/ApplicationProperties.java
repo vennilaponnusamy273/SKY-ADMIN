@@ -43,4 +43,11 @@ public class ApplicationProperties {
 	@ConfigProperty(name = "appconfig.sms.password")
 	String smsPassword;
 	
+	@ConfigProperty(name = "appconfig.sms.ref.textone")
+	String smsRefFisrtText;
+	@ConfigProperty(name = "appconfig.sms.ref.texttwo")
+	String smsRefSecondText;
+	@ConfigProperty(name = "appconfig.ipv.url.shortner.token")
+	String ivrUrlShortnerToken;
+	
 }
