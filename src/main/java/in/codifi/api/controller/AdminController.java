@@ -5,6 +5,7 @@ import javax.ws.rs.Path;
 
 import in.codifi.api.controller.spec.IAdminController;
 import in.codifi.api.response.model.ResponseModel;
+import in.codifi.api.restservice.SmsRestService;
 import in.codifi.api.service.spec.IAdminService;
 import in.codifi.api.utilities.CommonMethods;
 import in.codifi.api.utilities.MessageConstants;
@@ -18,6 +19,8 @@ public class AdminController implements IAdminController {
 	IAdminService adminService;
 	@Inject
 	CommonMethods commonMethods;
+	@Inject
+	SmsRestService restService;
 
 	/**
 	 * Method to send mail on Esign Users
@@ -46,7 +49,7 @@ public class AdminController implements IAdminController {
 		}
 		return responseModel;
 	}
-	
+
 	/**
 	 * method to get ifsc
 	 * 
@@ -63,6 +66,12 @@ public class AdminController implements IAdminController {
 			responseModel = commonMethods.constructFailedMsg(MessageConstants.PARAMETER_NULL);
 		}
 		return responseModel;
+	}
+
+	@Override
+	public ResponseModel test() {
+		restService.sendSms("aabc", 8526707787l);
+		return null;
 	}
 
 }

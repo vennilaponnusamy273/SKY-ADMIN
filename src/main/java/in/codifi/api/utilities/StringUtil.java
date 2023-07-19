@@ -1,7 +1,6 @@
 package in.codifi.api.utilities;
 
 import java.util.List;
-import java.util.ArrayList;
 
 import in.codifi.api.request.model.ApiStatusModel;
 

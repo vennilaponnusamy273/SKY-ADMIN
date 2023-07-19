@@ -10,8 +10,6 @@ import javax.validation.constraints.NotNull;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import org.eclipse.microprofile.rest.client.inject.RestClient;
-
 import in.codifi.api.config.ApplicationProperties;
 import in.codifi.api.entity.ApplicationUserEntity;
 import in.codifi.api.entity.EmailTemplateEntity;
@@ -26,10 +24,6 @@ import in.codifi.api.service.spec.IReferralService;
 import in.codifi.api.utilities.CommonMail;
 import in.codifi.api.utilities.CommonMethods;
 import in.codifi.api.utilities.EkycConstants;
-import in.codifi.api.restservice.ISmsRestService;
-import in.codifi.api.service.spec.IReferralService;
-import in.codifi.api.utilities.CommonMail;
-import in.codifi.api.utilities.CommonMethods;
 import in.codifi.api.utilities.MessageConstants;
 import in.codifi.api.utilities.StringUtil;
 
@@ -37,7 +31,6 @@ import in.codifi.api.utilities.StringUtil;
 public class ReferralService implements IReferralService {
 
 	private static final Logger logger = LogManager.getLogger(ReferralService.class);
-
 
 	@Inject
 	CommonMethods commonMethods;
@@ -55,7 +48,6 @@ public class ReferralService implements IReferralService {
 	EmailTemplateRepository emailTemplateRepository;
 	@Inject
 	UrlShortnerRestService restService;
-
 
 	@Override
 	public ResponseModel setReferral(ReferralEntity NotifyEntity) {
@@ -98,28 +90,6 @@ public class ReferralService implements IReferralService {
 					response.setReason("Already details Available in Referral Table");
 				}
 			} else {
-				response.setStat(EkycConstants.SUCCESS_STATUS);
-				response.setMessage(EkycConstants.SUCCESS_MSG);
-//								String body = bodyMessage.replace("{UserName}", name);
-								String subject = emailTemplateEntity.getSubject();
-								commonMail.sendMail(toAdd, subject, bodyMessage);
-							}
-						}
-						response.setStat(MessageConstants.SUCCESS_STATUS);
-						response.setMessage(MessageConstants.SUCCESS_MSG);
-						response.setResult(NotifyEntity);
-						response.setReason("Nodification send successfully");
-					} else {
-						response.setStat(MessageConstants.SUCCESS_STATUS);
-						response.setMessage(MessageConstants.SUCCESS_MSG);
-						response.setReason("Mobile number Is Empty");
-					}
-				} else {
-					response.setStat(MessageConstants.SUCCESS_STATUS);
-					response.setMessage(MessageConstants.SUCCESS_MSG);
-					response.setReason("Already details Available in Referral Table");
-				}
-			} else {
 				response.setStat(MessageConstants.SUCCESS_STATUS);
 				response.setMessage(MessageConstants.SUCCESS_MSG);
 				response.setReason("MobileNumber already available in Master table");
@@ -139,12 +109,8 @@ public class ReferralService implements IReferralService {
 	public void sendMessagetoMobile(String Message, long mobileNumber) {
 		try {
 			String shortenUrl = restService.shortenUrl(Message);
-			System.out.println("the shortenUrl"+shortenUrl);
+			System.out.println("the shortenUrl" + shortenUrl);
 			ismsRestService.sendSms(shortenUrl, mobileNumber);
-			String Text = Message + " " + props.getSmsText();
-			String message = ismsRestService.SendSms(props.getSmsFeedId(), props.getSmsSenderId(),
-					props.getSmsUserName(), props.getSmsPassword(), String.valueOf(mobileNumber), Text);
-			System.out.println(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

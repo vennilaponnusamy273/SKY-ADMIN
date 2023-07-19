@@ -47,4 +47,10 @@ public interface IAdminController {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	public ResponseModel getIfsc(@NotNull @QueryParam("ifscCode") String ifscCode);
+	
+	@GET
+	@Path("/test")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public ResponseModel test();
 }

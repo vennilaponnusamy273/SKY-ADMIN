@@ -136,18 +136,18 @@ public class CommonMethods {
 	        // Create a StringBuilder to build the formatted stage and reason
 	        StringBuilder formattedStagesWithReasons = new StringBuilder();
 	        for (ApiStatusEntity apiStatusEntity : apiStatusEntities) {
-	            String stageFromKra = kraKeyValueRepository.getkeyValueForKra("11", "STAGE", apiStatusEntity.getStage());
+	            String stageFromKra = kraKeyValueRepository.getkeyValueForKra("12", "STAGE_REJECTION", apiStatusEntity.getStage());
 	            String setReason = apiStatusEntity.getReason();
 
 	            // Append each stage and reason to the formattedStagesWithReasons StringBuilder
-	            formattedStagesWithReasons.append("<div class=\"stage\"><b>").append(stageFromKra).append(":</b><br>").append(setReason).append("<br></div>");
+	            formattedStagesWithReasons.append("<div class=\"stage\"><b>").append(stageFromKra).append(":</b><br>&emsp;&emsp;").append(setReason).append("<br></div>");
 	        }
 
 	        // Convert the StringBuilder to a string
 	        String stagesWithReasons = formattedStagesWithReasons.toString();
 
 	        body = body.replace("{StagesWithReasons}", stagesWithReasons);
-
+	        body = body.replace("{ReSubmitLink}", "https://ekyc.nidhihq.com");
 	        List<String> toAdd = Collections.singletonList(emailId);
 	        commonMail.sendMail(toAdd, subject, body);
 	    }
