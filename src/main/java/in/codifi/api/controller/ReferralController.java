@@ -3,7 +3,6 @@ package in.codifi.api.controller;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Path;
-
 import in.codifi.api.controller.spec.IReferralController;
 import in.codifi.api.entity.ReferralEntity;
 import in.codifi.api.response.model.ResponseModel;

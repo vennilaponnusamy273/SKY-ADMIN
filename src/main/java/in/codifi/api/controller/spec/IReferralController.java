@@ -8,7 +8,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
-
 import in.codifi.api.entity.ReferralEntity;
 import in.codifi.api.response.model.ResponseModel;
 

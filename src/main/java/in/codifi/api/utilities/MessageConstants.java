@@ -10,6 +10,7 @@ public class MessageConstants {
 
 	// GETUSERDETAILS
 	public static final Object OFFSETEXIT = "The OffSet Exits the data";
+	public static final String NO_RECORD_FOUND = "No Record found";
 
 	// DOCUMENT DOWNLOAD
 	public static final String FILE_NOT_FOUND = "File Not found on this APPLICATION_ID";
@@ -40,4 +41,9 @@ public class MessageConstants {
 	public static final String REFERRAL_BY_NULL = "Referral by is null";
 	public static final String MOBILE_NO_NULL = "Mobile Number is null";
 	public static final String EKYC_URL = "https://ekyc.nidhihq.com/?refBy=";
+
+	public static final String EKYC_URL = "https://ekyc.nidhihq.com/?refBy=";
+
+	public static final String REFERRAL_BY_NULL = "Referral by is null";
+	public static final String MOBILE_NO_NULL = "Mobile Number is null";
 }

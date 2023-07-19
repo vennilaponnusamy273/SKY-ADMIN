@@ -2,11 +2,12 @@ package in.codifi.api.repository;
 
 import java.util.List;
 
-import org.springframework.data.repository.CrudRepository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import in.codifi.api.entity.ReferralEntity;
 
-public interface ReferralRepository extends CrudRepository<ReferralEntity, Long> {
+public interface ReferralRepository extends JpaRepository<ReferralEntity, Long> {
 
 	ReferralEntity findByMobileNo(long mobileNo);
 
