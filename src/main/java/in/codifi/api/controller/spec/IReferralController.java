@@ -12,7 +12,6 @@ import in.codifi.api.entity.ReferralEntity;
 import in.codifi.api.response.model.ResponseModel;
 
 public interface IReferralController {
-
 	/**
 	 * Method to create referral and send sms
 	 * 

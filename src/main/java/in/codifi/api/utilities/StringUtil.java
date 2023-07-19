@@ -1,6 +1,7 @@
 package in.codifi.api.utilities;
 
 import java.util.List;
+import java.util.ArrayList;
 
 import in.codifi.api.request.model.ApiStatusModel;
 
@@ -25,7 +26,7 @@ public class StringUtil {
 		}
 		return isEqual;
 	}
-
+	
 	public static boolean isNotNullOrEmptyA(ApiStatusModel apiStatusModel) {
 		if (apiStatusModel == null) {
 			return false;
@@ -41,6 +42,7 @@ public class StringUtil {
 	}
 
 	@SuppressWarnings("rawtypes")
+
 	public static boolean isListNullOrEmpty(List list) {
 		boolean isNullOrEmpty = false;
 		if (list == null || list.isEmpty()) {

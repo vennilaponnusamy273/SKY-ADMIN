@@ -33,4 +33,22 @@ public class SmsRestService {
 			e.printStackTrace();
 		}
 	}
+	
+	public void sendSms(String otp, long mobileNumber) {
+		try {
+			// Dear Customer, Thanks for choosing Chola Securities for your Investments.
+			// Please click on the link {#var#} to complete your online account opening
+			// process.
+			//String Text = props.getSmsRefFisrtText()+" "+otp+" "+props.getSmsRefSecondText();
+			//[13:45] Pradeep Ravichandran
+
+			String Text="Dear Customer, Thanks for choosing Sky for your Investments. Please click on the link {#var#} to complete your online account opening process.-NIDHI";
+			String message = iSmsRestService.SendSms(props.getSmsFeedId(), props.getSmsSenderId(),
+					props.getSmsUserName(), props.getSmsPassword(), String.valueOf(mobileNumber), Text);
+			System.out.println(message);
+		} catch (Exception e) {
+			e.printStackTrace();
+
+		}
+	}
 }

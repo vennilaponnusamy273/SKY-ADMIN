@@ -9,6 +9,7 @@ import javax.validation.constraints.NotNull;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import in.codifi.api.config.ApplicationProperties;
@@ -19,6 +20,12 @@ import in.codifi.api.repository.ApplicationUserRepository;
 import in.codifi.api.repository.EmailTemplateRepository;
 import in.codifi.api.repository.ReferralRepository;
 import in.codifi.api.response.model.ResponseModel;
+import in.codifi.api.restservice.SmsRestService;
+import in.codifi.api.restservice.UrlShortnerRestService;
+import in.codifi.api.service.spec.IReferralService;
+import in.codifi.api.utilities.CommonMail;
+import in.codifi.api.utilities.CommonMethods;
+import in.codifi.api.utilities.EkycConstants;
 import in.codifi.api.restservice.ISmsRestService;
 import in.codifi.api.service.spec.IReferralService;
 import in.codifi.api.utilities.CommonMail;
@@ -29,7 +36,8 @@ import in.codifi.api.utilities.StringUtil;
 @ApplicationScoped
 public class ReferralService implements IReferralService {
 
-	private static final Logger logger = LogManager.getLogger(GetUserService.class);
+	private static final Logger logger = LogManager.getLogger(ReferralService.class);
+
 
 	@Inject
 	CommonMethods commonMethods;
@@ -42,10 +50,12 @@ public class ReferralService implements IReferralService {
 	@Inject
 	ReferralRepository notifyRepository;
 	@Inject
-	@RestClient
-	ISmsRestService ismsRestService;
+	SmsRestService ismsRestService;
 	@Inject
 	EmailTemplateRepository emailTemplateRepository;
+	@Inject
+	UrlShortnerRestService restService;
+
 
 	@Override
 	public ResponseModel setReferral(ReferralEntity NotifyEntity) {
@@ -59,7 +69,8 @@ public class ReferralService implements IReferralService {
 					if (NotifyEntity.getMobileNo() != null && NotifyEntity.getMobileNo() > 0) {
 						NotifyEntity.setUrl(MessageConstants.EKYC_URL + NotifyEntity.getReferralBy());
 						notifyRepository.save(NotifyEntity);
-						sendMessagetoMobile("test", NotifyEntity.getMobileNo());
+						sendMessagetoMobile(NotifyEntity.getUrl(), NotifyEntity.getMobileNo());
+
 						if (StringUtil.isNotNullOrEmpty(NotifyEntity.getEmailId())) {
 							EmailTemplateEntity emailTemplateEntity = emailTemplateRepository.findByKeyData("referral");
 							if (emailTemplateEntity != null && emailTemplateEntity.getBody() != null
@@ -67,6 +78,28 @@ public class ReferralService implements IReferralService {
 								List<String> toAdd = new ArrayList<>();
 								toAdd.add(NotifyEntity.getEmailId());
 								String bodyMessage = emailTemplateEntity.getBody();
+								String body = bodyMessage.replace("{Link}", NotifyEntity.getUrl());
+								String subject = emailTemplateEntity.getSubject();
+								commonMail.sendMail(toAdd, subject, body);
+							}
+						}
+						response.setStat(EkycConstants.SUCCESS_STATUS);
+						response.setMessage(EkycConstants.SUCCESS_MSG);
+						response.setResult(NotifyEntity);
+						response.setReason("Nodification send successfully");
+					} else {
+						response.setStat(EkycConstants.SUCCESS_STATUS);
+						response.setMessage(EkycConstants.SUCCESS_MSG);
+						response.setReason("Mobile number Is Empty");
+					}
+				} else {
+					response.setStat(EkycConstants.SUCCESS_STATUS);
+					response.setMessage(EkycConstants.SUCCESS_MSG);
+					response.setReason("Already details Available in Referral Table");
+				}
+			} else {
+				response.setStat(EkycConstants.SUCCESS_STATUS);
+				response.setMessage(EkycConstants.SUCCESS_MSG);
 //								String body = bodyMessage.replace("{UserName}", name);
 								String subject = emailTemplateEntity.getSubject();
 								commonMail.sendMail(toAdd, subject, bodyMessage);
@@ -105,6 +138,9 @@ public class ReferralService implements IReferralService {
 
 	public void sendMessagetoMobile(String Message, long mobileNumber) {
 		try {
+			String shortenUrl = restService.shortenUrl(Message);
+			System.out.println("the shortenUrl"+shortenUrl);
+			ismsRestService.sendSms(shortenUrl, mobileNumber);
 			String Text = Message + " " + props.getSmsText();
 			String message = ismsRestService.SendSms(props.getSmsFeedId(), props.getSmsSenderId(),
 					props.getSmsUserName(), props.getSmsPassword(), String.valueOf(mobileNumber), Text);
@@ -122,7 +158,7 @@ public class ReferralService implements IReferralService {
 		ResponseModel response = new ResponseModel();
 		ReferralEntity existingNotifyEntity = notifyRepository.findByIdAndReferralBy(id, referralId);
 		if (existingNotifyEntity != null) {
-			sendMessagetoMobile("url", existingNotifyEntity.getMobileNo());
+			sendMessagetoMobile(existingNotifyEntity.getUrl(), existingNotifyEntity.getMobileNo());
 			if (StringUtil.isNotNullOrEmpty(existingNotifyEntity.getEmailId())) {
 				if (StringUtil.isNotNullOrEmpty(existingNotifyEntity.getEmailId())) {
 					EmailTemplateEntity emailTemplateEntity = emailTemplateRepository.findByKeyData("referral");
@@ -131,11 +167,11 @@ public class ReferralService implements IReferralService {
 						List<String> toAdd = new ArrayList<>();
 						toAdd.add(existingNotifyEntity.getEmailId());
 						String bodyMessage = emailTemplateEntity.getBody();
-						String body = bodyMessage.replace("{otp}", existingNotifyEntity.getUrl());
+						String body = bodyMessage.replace("{Link}", existingNotifyEntity.getUrl());
 						String subject = emailTemplateEntity.getSubject();
 						commonMail.sendMail(toAdd, subject, body);
-						response.setStat(MessageConstants.SUCCESS_STATUS);
-						response.setMessage(MessageConstants.SUCCESS_MSG);
+						response.setStat(EkycConstants.SUCCESS_STATUS);
+						response.setMessage(EkycConstants.SUCCESS_MSG);
 						response.setReason("Notification Successfully Sent..!");
 					}
 				}
@@ -154,8 +190,8 @@ public class ReferralService implements IReferralService {
 		ResponseModel response = new ResponseModel();
 		List<ReferralEntity> ReferralEntities = notifyRepository.findByReferralBy(referralId);
 		if (StringUtil.isListNotNullOrEmpty(ReferralEntities)) {
-			response.setStat(MessageConstants.SUCCESS_STATUS);
-			response.setMessage(MessageConstants.SUCCESS_MSG);
+			response.setStat(EkycConstants.SUCCESS_STATUS);
+			response.setMessage(EkycConstants.SUCCESS_MSG);
 			response.setResult(ReferralEntities);
 		} else {
 			response = commonMethods.constructFailedMsg(MessageConstants.NO_RECORD_FOUND);

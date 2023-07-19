@@ -4,18 +4,23 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.mail.MessagingException;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import in.codifi.api.config.ApplicationProperties;
+import in.codifi.api.entity.ApiStatusEntity;
 import in.codifi.api.entity.EmailTemplateEntity;
 import in.codifi.api.entity.ErrorLogEntity;
+import in.codifi.api.repository.ApiStatusRepository;
 import in.codifi.api.repository.EmailTemplateRepository;
 import in.codifi.api.repository.ErrorLogRepository;
+import in.codifi.api.repository.KraKeyValueRepository;
 import in.codifi.api.request.model.BankAddressModel;
 import in.codifi.api.response.model.ResponseModel;
 import io.quarkus.mailer.Mail;
@@ -33,7 +38,10 @@ public class CommonMethods {
 	CommonMail commonMail;
 	@Inject
 	ApplicationProperties props;
-	
+	@Inject
+	ApiStatusRepository apiStatusRepository;
+	@Inject
+	KraKeyValueRepository kraKeyValueRepository;
 	@Inject
 	ErrorLogRepository errorLogRepository;
 	
@@ -114,18 +122,34 @@ public class CommonMethods {
 	}
 
 	/**
-	 * Method to send IPV Link to email
+	 * Method to send rejection mail to email
 	 * 
-	 * @param Url
-	 * @param mobileNumber
 	 */
-	public void sendRejectionMail(String userName, String emailId) throws MessagingException {
-		EmailTemplateEntity emailTempentity = emailTemplateRepository.findByKeyData("Rejection");
-		String body_Message = emailTempentity.getBody();
-		String body = body_Message.replace("{UserName}", userName);
-		String subject = emailTempentity.getSubject();
-		List<String> toAdd = new ArrayList<>();
-		toAdd.add(emailId);
-		commonMail.sendMail(toAdd, subject, body);
+	public void sendRejectionMail(String userName, String emailId, long applicationId) throws MessagingException {
+	    EmailTemplateEntity emailTempentity = emailTemplateRepository.findByKeyData("Rejection");
+	    String body_Message = emailTempentity.getBody();
+	    String body = body_Message.replace("{UserName}", userName);
+
+	    String subject = emailTempentity.getSubject();
+	    List<ApiStatusEntity> apiStatusEntities = apiStatusRepository.findByApplicationIdAndStatus(applicationId, 0);
+	    if (apiStatusEntities != null && !apiStatusEntities.isEmpty()) {
+	        // Create a StringBuilder to build the formatted stage and reason
+	        StringBuilder formattedStagesWithReasons = new StringBuilder();
+	        for (ApiStatusEntity apiStatusEntity : apiStatusEntities) {
+	            String stageFromKra = kraKeyValueRepository.getkeyValueForKra("11", "STAGE", apiStatusEntity.getStage());
+	            String setReason = apiStatusEntity.getReason();
+
+	            // Append each stage and reason to the formattedStagesWithReasons StringBuilder
+	            formattedStagesWithReasons.append("<div class=\"stage\"><b>").append(stageFromKra).append(":</b><br>").append(setReason).append("<br></div>");
+	        }
+
+	        // Convert the StringBuilder to a string
+	        String stagesWithReasons = formattedStagesWithReasons.toString();
+
+	        body = body.replace("{StagesWithReasons}", stagesWithReasons);
+
+	        List<String> toAdd = Collections.singletonList(emailId);
+	        commonMail.sendMail(toAdd, subject, body);
+	    }
 	}	
 }

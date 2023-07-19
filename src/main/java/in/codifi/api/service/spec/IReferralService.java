@@ -6,7 +6,6 @@ import in.codifi.api.entity.ReferralEntity;
 import in.codifi.api.response.model.ResponseModel;
 
 public interface IReferralService {
-
 	/**
 	 * Method to nodify to MEssage and Email
 	 * 

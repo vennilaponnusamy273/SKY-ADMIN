@@ -17,6 +17,7 @@ import lombok.Setter;
 public class ReferralEntity extends CommonEntity implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
@@ -42,4 +43,5 @@ public class ReferralEntity extends CommonEntity implements Serializable {
 
 	@Column(name = "referral_by")
 	private String referralBy;
+
 }
