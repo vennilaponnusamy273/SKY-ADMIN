@@ -44,4 +44,13 @@ public class ReferralEntity extends CommonEntity implements Serializable {
 	@Column(name = "referral_by")
 	private String referralBy;
 
+	@Column(name = "ref_by_branch")
+	private String refByBranch;
+
+	@Column(name = "ref_by_name")
+	private String refByName;
+
+	@Column(name = "ref_by_designation")
+	private String refByDesignation;
+
 }
