@@ -10,6 +10,7 @@ public class MessageConstants {
 
 	// GETUSERDETAILS
 	public static final Object OFFSETEXIT = "The OffSet Exits the data";
+	public static final String LIMIT_VALIDATION_MESSAGE = "Limit should be less than 50";
 	public static final String NO_RECORD_FOUND = "No Record found";
 
 	// DOCUMENT DOWNLOAD
