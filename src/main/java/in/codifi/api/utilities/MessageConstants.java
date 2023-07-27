@@ -7,6 +7,8 @@ public class MessageConstants {
 	public static final int SUCCESS_STATUS = 1;
 	public static final String FAILED_MSG = "Failed";
 	public static final String SUCCESS_MSG = "Success";
+	public static final String START_TIME = " 00:00:00";
+	public static final String END_TIME = " 23:59:59";
 
 	// GETUSERDETAILS
 	public static final Object OFFSETEXIT = "The OffSet Exits the data";
