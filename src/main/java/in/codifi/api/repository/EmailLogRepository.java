@@ -11,4 +11,5 @@ public interface EmailLogRepository extends CrudRepository<EmailLogEntity, Long>
 	List<EmailLogEntity> findByIdBetween(long startId, long endId);
 
 	List<EmailLogEntity> findByCreatedOnBetween(Date fromDate, Date toDate);
+	List<EmailLogEntity> findByCreatedOnBetweenAndEmailId(Date fromDate, Date toDate,String emailId);
 }

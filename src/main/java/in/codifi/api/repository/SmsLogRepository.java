@@ -12,4 +12,6 @@ public interface SmsLogRepository extends CrudRepository<SmsLogEntity, Long> {
 	List<SmsLogEntity> findByIdBetween(long startId, long endId);
 	
 	List<SmsLogEntity> findByCreatedOnBetween(Date fromDate, Date toDate);
+
+	List<SmsLogEntity> findByCreatedOnBetweenAndMobileNo(Date startDate, Date endDate, long mobileNo);
 }
