@@ -18,6 +18,5 @@ public class SmsEmailReqModel implements Serializable {
 	private String type;
 	private String fromDate;
 	private String toDate;
-	private long  mobileNumber;
-	private String  emailiD;
+	private String value;
 }

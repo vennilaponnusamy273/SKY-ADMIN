@@ -17,6 +17,7 @@ import in.codifi.api.service.spec.ISmsAndEmailLogService;
 import in.codifi.api.utilities.CommonMethods;
 import in.codifi.api.utilities.EkycConstants;
 import in.codifi.api.utilities.MessageConstants;
+import in.codifi.api.utilities.StringUtil;
 
 @ApplicationScoped
 public class SmsAndEmailLogService implements ISmsAndEmailLogService {
@@ -55,14 +56,15 @@ public class SmsAndEmailLogService implements ISmsAndEmailLogService {
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			Date startDate = dateFormat.parse(reqModel.getFromDate() + MessageConstants.START_TIME);
 			Date endDate = dateFormat.parse(reqModel.getToDate() + MessageConstants.END_TIME);
-			
+
 			List<SmsLogEntity> totalResult = null;
-	        if (reqModel.getMobileNumber() != 0) {
-	            totalResult = smsLogRepository.findByCreatedOnBetweenAndMobileNo(startDate, endDate, reqModel.getMobileNumber());
-	        } else {
-	            totalResult = smsLogRepository.findByCreatedOnBetween(startDate, endDate);
-	        }
-	        
+			if (StringUtil.isNotNullOrEmpty(reqModel.getValue())) {
+				totalResult = smsLogRepository.findByCreatedOnBetweenAndMobileNo(startDate, endDate,
+						Long.parseLong(reqModel.getValue()));
+			} else {
+				totalResult = smsLogRepository.findByCreatedOnBetween(startDate, endDate);
+			}
+
 			int startIndex = reqModel.getOffset();
 			int endIndex = Math.min(reqModel.getOffset() + reqModel.getLimit(), totalResult.size());
 			List<SmsLogEntity> resultList = totalResult.subList(startIndex, endIndex);
@@ -81,18 +83,19 @@ public class SmsAndEmailLogService implements ISmsAndEmailLogService {
 		ResponseModel response = new ResponseModel();
 		try {
 			long count = emailLogRepository.count();
-			/**if (reqModel.getOffset() >= count) {
+			if (reqModel.getOffset() >= count) {
 				response.setResult(MessageConstants.OFFSETEXIT);
 				return response;
-			}**/
+			}
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			Date startDate = dateFormat.parse(reqModel.getFromDate() + MessageConstants.START_TIME);
 			Date endDate = dateFormat.parse(reqModel.getToDate() + MessageConstants.END_TIME);
 			List<EmailLogEntity> totalResult = null;
-			if(reqModel.getEmailiD()!=null) {
-				totalResult=emailLogRepository.findByCreatedOnBetweenAndEmailId(startDate, endDate, reqModel.getEmailiD());
-			}else {
-			 totalResult = emailLogRepository.findByCreatedOnBetween(startDate, endDate);
+			if (StringUtil.isNotNullOrEmpty(reqModel.getValue())) {
+				totalResult = emailLogRepository.findByCreatedOnBetweenAndEmailId(startDate, endDate,
+						reqModel.getValue());
+			} else {
+				totalResult = emailLogRepository.findByCreatedOnBetween(startDate, endDate);
 			}
 			int startIndex = reqModel.getOffset();
 			int endIndex = Math.min(reqModel.getOffset() + reqModel.getLimit(), totalResult.size());
