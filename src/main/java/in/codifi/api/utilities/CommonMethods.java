@@ -157,8 +157,6 @@ public class CommonMethods {
 			body = body.replace("{ReSubmitLink}", "https://ekyc.gopocket.in");
 			List<String> toAdd = Collections.singletonList(emailId);
 			commonMail.sendMail(toAdd, subject, body);
-			storeEmailLog(body, subject, "The email was sent in Template: Rejection Status", "Rejection Status",
-					emailId);
 		}
 	}
 
