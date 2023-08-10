@@ -164,24 +164,26 @@ public class CommonMethods {
 	 * Method to create smsLogMethod
 	 * 
 	 * @author Vennila
-	 * @param SmsLogEntity
+	 * @param EmailLogEntity
 	 * @return
 	 */
 
-	public void storeEmailLog(String message, String ReqSub, String emailResponse, String logMethod, String mailId) {
+	public void storeEmailLog(String message, String ReqSub, String emailResponse, String logMethod,
+			List<String> mailIds) {
 		if (message == null || emailResponse == null || logMethod == null) {
 			throw new IllegalArgumentException("Request, EmailResponse, or logMethod cannot be null.");
 		}
 
 		try {
-			EmailLogEntity emailLogEntity = new EmailLogEntity();
-			emailLogEntity.setEmailId(mailId);
-			emailLogEntity.setLogMethod(logMethod);
-			emailLogEntity.setReqLogSub(ReqSub);
-			// System.out.println("the message"+message);
-			emailLogEntity.setReqLog(message);
-			emailLogEntity.setResponseLog(emailResponse);
-			emailLogRepository.save(emailLogEntity);
+			for (String mailId : mailIds) {
+				EmailLogEntity emailLogEntity = new EmailLogEntity();
+				emailLogEntity.setEmailId(mailId);
+				emailLogEntity.setLogMethod(logMethod);
+				emailLogEntity.setReqLogSub(ReqSub);
+				emailLogEntity.setReqLog(message);
+				emailLogEntity.setResponseLog(emailResponse);
+				emailLogRepository.save(emailLogEntity);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
