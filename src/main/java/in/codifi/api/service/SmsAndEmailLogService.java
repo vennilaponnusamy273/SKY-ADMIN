@@ -53,10 +53,20 @@ public class SmsAndEmailLogService implements ISmsAndEmailLogService {
 				response.setResult(MessageConstants.OFFSETEXIT);
 				return response;
 			}
+			Date startDate;
+			Date endDate;
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-			Date startDate = dateFormat.parse(reqModel.getFromDate() + MessageConstants.START_TIME);
-			Date endDate = dateFormat.parse(reqModel.getToDate() + MessageConstants.END_TIME);
+			if (!isCorrectDateFormat(reqModel.getFromDate())) {
+				startDate = dateFormat.parse(reqModel.getFromDate() + MessageConstants.START_TIME);
+			} else {
+				startDate = dateFormat.parse(reqModel.getFromDate());
+			}
 
+			if (!isCorrectDateFormat(reqModel.getToDate())) {
+				endDate = dateFormat.parse(reqModel.getToDate() + MessageConstants.END_TIME);
+			} else {
+				endDate = dateFormat.parse(reqModel.getToDate());
+			}
 			List<SmsLogEntity> totalResult = null;
 			if (StringUtil.isNotNullOrEmpty(reqModel.getValue())) {
 				totalResult = smsLogRepository.findByCreatedOnBetweenAndMobileNo(startDate, endDate,
@@ -79,6 +89,12 @@ public class SmsAndEmailLogService implements ISmsAndEmailLogService {
 		return response;
 	}
 
+	public boolean isCorrectDateFormat(String date) {
+		// Regular expression to match "yyyy-MM-dd HH:mm:ss" format
+		String correctDate = "\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}";
+		return date.matches(correctDate);
+	}
+
 	private ResponseModel getEmailLog(SmsEmailReqModel reqModel) {
 		ResponseModel response = new ResponseModel();
 		try {
@@ -87,9 +103,19 @@ public class SmsAndEmailLogService implements ISmsAndEmailLogService {
 				response.setResult(MessageConstants.OFFSETEXIT);
 				return response;
 			}
+			Date startDate;
+			Date endDate;
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-			Date startDate = dateFormat.parse(reqModel.getFromDate() + MessageConstants.START_TIME);
-			Date endDate = dateFormat.parse(reqModel.getToDate() + MessageConstants.END_TIME);
+			if (!isCorrectDateFormat(reqModel.getFromDate())) {
+				startDate = dateFormat.parse(reqModel.getFromDate() + MessageConstants.START_TIME);
+			} else {
+				startDate = dateFormat.parse(reqModel.getFromDate());
+			}
+			if (!isCorrectDateFormat(reqModel.getToDate())) {
+				endDate = dateFormat.parse(reqModel.getToDate() + MessageConstants.END_TIME);
+			} else {
+				endDate = dateFormat.parse(reqModel.getToDate());
+			}
 			List<EmailLogEntity> totalResult = null;
 			if (StringUtil.isNotNullOrEmpty(reqModel.getValue())) {
 				totalResult = emailLogRepository.findByCreatedOnBetweenAndEmailId(startDate, endDate,

@@ -18,11 +18,13 @@ import in.codifi.api.entity.ApiStatusEntity;
 import in.codifi.api.entity.EmailLogEntity;
 import in.codifi.api.entity.EmailTemplateEntity;
 import in.codifi.api.entity.ErrorLogEntity;
+import in.codifi.api.entity.SmsLogEntity;
 import in.codifi.api.repository.ApiStatusRepository;
 import in.codifi.api.repository.EmailLogRepository;
 import in.codifi.api.repository.EmailTemplateRepository;
 import in.codifi.api.repository.ErrorLogRepository;
 import in.codifi.api.repository.KraKeyValueRepository;
+import in.codifi.api.repository.SmsLogRepository;
 import in.codifi.api.request.model.BankAddressModel;
 import in.codifi.api.response.model.ResponseModel;
 import io.quarkus.mailer.Mail;
@@ -33,7 +35,8 @@ public class CommonMethods {
 
 	@Inject
 	EmailTemplateRepository emailTemplateRepository;
-
+	@Inject
+	SmsLogRepository smsLogRepository;
 	@Inject
 	Mailer mailer;
 	@Inject
@@ -164,27 +167,52 @@ public class CommonMethods {
 	 * Method to create smsLogMethod
 	 * 
 	 * @author Vennila
-	 * @param SmsLogEntity
+	 * @param EmailLogEntity
 	 * @return
 	 */
 
-	public void storeEmailLog(String message, String ReqSub, String emailResponse, String logMethod, String mailId) {
+	public void storeEmailLog(String message, String ReqSub, String emailResponse, String logMethod,
+			List<String> mailIds) {
 		if (message == null || emailResponse == null || logMethod == null) {
 			throw new IllegalArgumentException("Request, EmailResponse, or logMethod cannot be null.");
 		}
 
 		try {
-			EmailLogEntity emailLogEntity = new EmailLogEntity();
-			emailLogEntity.setEmailId(mailId);
-			emailLogEntity.setLogMethod(logMethod);
-			emailLogEntity.setReqLogSub(ReqSub);
-			// System.out.println("the message"+message);
-			emailLogEntity.setReqLog(message);
-			emailLogEntity.setResponseLog(emailResponse);
-			emailLogRepository.save(emailLogEntity);
+			for (String mailId : mailIds) {
+				EmailLogEntity emailLogEntity = new EmailLogEntity();
+				emailLogEntity.setEmailId(mailId);
+				emailLogEntity.setLogMethod(logMethod);
+				emailLogEntity.setReqLogSub(ReqSub);
+				emailLogEntity.setReqLog(message);
+				emailLogEntity.setResponseLog(emailResponse);
+				emailLogRepository.save(emailLogEntity);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
+	/**
+	 * Method to create smsLogMethod
+	 * 
+	 * @author Vennila
+	 * @param SmsLogEntity
+	 * @return
+	 */
 
+	public void storeSmsLog(String request, String smsResponse, String logMethod, long mobileNumber) {
+		if (request == null || smsResponse == null || logMethod == null) {
+			// Handle invalid input, such as throwing an IllegalArgumentException.
+			throw new IllegalArgumentException("Request, smsResponse, or logMethod cannot be null.");
+		}
+		try {
+			SmsLogEntity smsLogEntity = new SmsLogEntity();
+			smsLogEntity.setMobileNo(mobileNumber);
+			smsLogEntity.setLogMethod(logMethod);
+			smsLogEntity.setRequestLog(request);
+			smsLogEntity.setResponseLog(smsResponse);
+			smsLogRepository.save(smsLogEntity);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 }

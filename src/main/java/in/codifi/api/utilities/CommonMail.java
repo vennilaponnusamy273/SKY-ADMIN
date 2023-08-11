@@ -70,7 +70,7 @@ public class CommonMail {
 				// Use Transport.send() method to send the message
 				Transport.send(message);
 				success = EkycConstants.SUCCESS_MSG;
-				commonMethods.storeEmailLog(msg, subject, success, subject, constructEmailIds(mailIds));
+				commonMethods.storeEmailLog(msg, subject, success, subject,mailIds);
 			} catch (MessagingException ex) {
 				ex.printStackTrace();
 			}
@@ -91,24 +91,4 @@ public class CommonMail {
 		}
 		return addresses;
 	}
-
-	/**
-	 * Method to add comma seperated for mail Ids
-	 * 
-	 * @param emails
-	 * @return
-	 */
-	private String constructEmailIds(List<String> emails) {
-		StringBuffer mailId = new StringBuffer();
-		try {
-			for (int i = 0; i < emails.size(); i++) {
-				mailId.append(emails.get(i));
-				mailId.append(",");
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return mailId.toString();
-	}
-
 }
