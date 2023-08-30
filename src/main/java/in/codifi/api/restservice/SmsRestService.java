@@ -54,12 +54,11 @@ public class SmsRestService {
 			// [13:45] Pradeep Ravichandran
 
 //			String Text = "Dear Customer, Thanks for choosing Sky for your Investments. Please click on the link {#var#} to complete your online account opening process.-NIDHI";
-			String Text = "Dear Customer, Thanks for choosing Sky for your Investments. Please click on the link " + link
-					+ " to complete your online account opening process.-NIDHI";
+			String Text ="Dear Customer, Thanks for choosing SKY for your Investments. Please click on the link "+link+" to complete your online account opening process.-Sky Broking";
 			String message = iSmsRestService.SendSms(props.getSmsFeedId(), props.getSmsSenderId(),
 					props.getSmsUserName(), props.getSmsPassword(), String.valueOf(mobileNumber), Text);
 			commonMethods.storeSmsLog(Text,message,"sendSmsToReferral",mobileNumber);
-			System.out.println(message);
+			//System.out.println(message);
 		} catch (Exception e) {
 			e.printStackTrace();
 

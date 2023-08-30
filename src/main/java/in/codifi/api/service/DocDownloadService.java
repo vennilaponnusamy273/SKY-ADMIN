@@ -2,6 +2,7 @@ package in.codifi.api.service;
 
 import java.io.File;
 import java.net.URLConnection;
+import java.time.Instant;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -51,6 +52,8 @@ public class DocDownloadService implements IDocDownloadService {
 	@Override
 	public Response downloadFile(@NotNull long applicationId, @NotNull String type) {
 		try {
+			long intime = Instant.now().toEpochMilli(); 
+			System.out.println(" In time - " + intime);
 			String attachmentType = null;
 			String esignUrl = null;
 			String slash = EkycConstants.UBUNTU_FILE_SEPERATOR;
@@ -78,14 +81,19 @@ public class DocDownloadService implements IDocDownloadService {
 			if (StringUtil.isNotNullOrEmpty(attachmentType)) {
 				String path = (type.equalsIgnoreCase(EkycConstants.DOC_ESIGN)) ? esignUrl
 						: props.getFileBasePath() + applicationId + slash + attachmentType;
-				File file = new File(path);
+								File file = new File(path);
 				String contentType = URLConnection.guessContentTypeFromName(attachmentType);
+				long outtime = Instant.now().toEpochMilli(); 
+				System.out.println(" Out time - " + outtime);
 				return Response.ok(file).type(contentType)
 						.header("Content-Disposition", "attachment; filename=" + file.getName()).build();
 			} else {
+				long outtime = Instant.now().toEpochMilli(); 
+				System.out.println(" Out time - " + outtime);
 				return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(MessageConstants.FILE_NOT_FOUND)
 						.build();
 			}
+			
 		} catch (Exception e) {
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
 					.entity("Failed to download file: " + e.getMessage()).build();

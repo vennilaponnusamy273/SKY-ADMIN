@@ -157,7 +157,7 @@ public class CommonMethods {
 			String stagesWithReasons = formattedStagesWithReasons.toString();
 
 			body = body.replace("{StagesWithReasons}", stagesWithReasons);
-			body = body.replace("{ReSubmitLink}", "https://ekyc.gopocket.in");
+			body = body.replace("{ReSubmitLink}", "https://kyc.skybroking.com");
 			List<String> toAdd = Collections.singletonList(emailId);
 			commonMail.sendMail(toAdd, subject, body);
 		}
