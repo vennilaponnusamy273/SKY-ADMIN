@@ -7,6 +7,10 @@ import javax.inject.Inject;
 import javax.mail.MessagingException;
 import javax.validation.constraints.NotNull;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import in.codifi.api.config.ApplicationProperties;
 import in.codifi.api.entity.ApplicationUserEntity;
 import in.codifi.api.entity.CheckApiEntity;
 import in.codifi.api.repository.ApplicationUserRepository;
@@ -14,20 +18,24 @@ import in.codifi.api.repository.CheckApiRepository;
 import in.codifi.api.request.model.BankAddressModel;
 import in.codifi.api.response.model.ResponseModel;
 import in.codifi.api.service.spec.IAdminService;
+import in.codifi.api.utilities.CommonMail;
 import in.codifi.api.utilities.CommonMethods;
 import in.codifi.api.utilities.EkycConstants;
 import in.codifi.api.utilities.MessageConstants;
 
 @ApplicationScoped
 public class AdminService implements IAdminService {
-
+	private static final Logger logger = LogManager.getLogger(AdminService.class);
 	@Inject
 	ApplicationUserRepository applicationUserRepository;
 	@Inject
 	CheckApiRepository apiRepository;
 	@Inject
 	CommonMethods commonMethods;
-
+	@Inject 
+	CommonMail commonMail;
+	@Inject
+	ApplicationProperties props;
 	@Override
 	public ResponseModel sendRejectionMail(@NotNull long applicationId, boolean confirmMail) {
 		ResponseModel responseModel = new ResponseModel();
@@ -112,4 +120,33 @@ public class AdminService implements IAdminService {
 		}
 		return responseModel;
 	}
+	
+
+	/**
+	 * Method to send RiskDisCloure Document via Email
+	 */
+	
+	@Override
+	public ResponseModel sendRiskDoc(long applicationId) {
+		ResponseModel response = new ResponseModel();
+		try {
+			Optional<ApplicationUserEntity> isUserPresent = applicationUserRepository.findById(applicationId);
+			if (isUserPresent.isPresent()) {
+				commonMail.sendRiskDocMail(isUserPresent.get().getEmailId(),isUserPresent.get().getUserName());
+				response.setResult("Document send successfully");
+			}else {
+				response = commonMethods.constructFailedMsg(MessageConstants.WRONG_USER_ID);
+			}
+		} catch (Exception e) {
+			logger.error("An error occurred: " + e.getMessage());
+			commonMethods.SaveLog(null, "AdminService", "sendRiskDoc", e.getMessage());
+			commonMethods.sendErrorMail(
+					"An error occurred while processing your request, In sendRiskDoc for the Error: " + e.getMessage(),
+					"ERR-001");
+			response = commonMethods.constructFailedMsg(e.getMessage());
+		}
+		return response;
+	}
+	
+	
 }

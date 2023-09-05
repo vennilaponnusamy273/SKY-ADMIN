@@ -53,4 +53,10 @@ public interface IAdminController {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	public ResponseModel test();
+	
+	@Path("/sendRiskDoc")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@APIResponse(description = "Method to send sendRiskDoc via Email")
+	public ResponseModel sendRiskDoc(@NotNull @QueryParam("applicationId") long applicationId);
 }

@@ -74,4 +74,15 @@ public class AdminController implements IAdminController {
 		return null;
 	}
 
+	@Override
+	public ResponseModel sendRiskDoc(long applicationId) {
+		ResponseModel responseModel = null;
+		if (applicationId > 0) {
+			responseModel = adminService.sendRiskDoc(applicationId);
+		} else {
+			responseModel = commonMethods.constructFailedMsg(MessageConstants.USER_ID_NULL);
+		}
+		return responseModel;
+	}
+
 }

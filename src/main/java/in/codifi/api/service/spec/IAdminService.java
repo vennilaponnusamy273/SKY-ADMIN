@@ -17,5 +17,21 @@ public interface IAdminService {
 	 */
 	ResponseModel pushBO(@NotNull long applicationId);
 	
+	/**
+	 * Method to getBank details form IFSC code
+	 * 
+	 * @author prade
+	 * @param ifscCode
+	 * @return
+	 */
 	ResponseModel getIfsc(@NotNull String ifscCode);
+	
+
+	/**
+	 * Method to send RiskDisCloure Document via Email
+	 * 
+	 * @param applicationId
+	 * @return
+	 */
+	ResponseModel sendRiskDoc(long applicationId);
 }
