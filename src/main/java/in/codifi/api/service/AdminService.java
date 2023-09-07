@@ -11,6 +11,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import in.codifi.api.config.ApplicationProperties;
+import in.codifi.api.controller.spec.backOfficeApiController;
 import in.codifi.api.entity.ApplicationUserEntity;
 import in.codifi.api.entity.CheckApiEntity;
 import in.codifi.api.repository.ApplicationUserRepository;
@@ -36,6 +37,8 @@ public class AdminService implements IAdminService {
 	CommonMail commonMail;
 	@Inject
 	ApplicationProperties props;
+	@Inject
+	backOfficeApiController BackOfficeApiController;
 	@Override
 	public ResponseModel sendRejectionMail(@NotNull long applicationId, boolean confirmMail) {
 		ResponseModel responseModel = new ResponseModel();
@@ -84,13 +87,14 @@ public class AdminService implements IAdminService {
 			apiEntity = new CheckApiEntity();
 			apiEntity.setStartStatus(1l);
 			apiEntity.setApplicationId(applicationId);
-			// TODO push to back office
+			
 		} else {
 			long count = apiEntity.getStartStatus();
 			apiEntity.setStartStatus(count + 1);
 		}
+		responseModel=BackOfficeApiController.updateBackoffice(applicationId);
 		apiRepository.save(apiEntity);
-		responseModel = new ResponseModel();
+		//responseModel = new ResponseModel();
 		responseModel.setMessage(EkycConstants.SUCCESS_MSG);
 		responseModel.setStat(EkycConstants.SUCCESS_STATUS);
 		responseModel.setReason("Back Office push started successfully");

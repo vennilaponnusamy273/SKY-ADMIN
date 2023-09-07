@@ -39,7 +39,8 @@ public interface IAdminController {
 	@Path("/pushBO")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	@APIResponse(description = "Method to dcheck trackWizz")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@APIResponse(description = "Method to dcheck pushBO")
 	public ResponseModel pushBO(@NotNull @QueryParam("applicationId") long applicationId);
 	
 	@GET
@@ -57,6 +58,7 @@ public interface IAdminController {
 	@Path("/sendRiskDoc")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
 	@APIResponse(description = "Method to send sendRiskDoc via Email")
 	public ResponseModel sendRiskDoc(@NotNull @QueryParam("applicationId") long applicationId);
 }

@@ -1,11 +1,17 @@
 package in.codifi.api.service;
 import java.io.IOException;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import org.slf4j.LoggerFactory;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import in.codifi.api.config.ApplicationProperties;
 import in.codifi.api.controller.spec.IAdminController;
+import in.codifi.api.entity.BackOfficeApiEntity;
 import in.codifi.api.helper.backOfficeHelper;
+import in.codifi.api.repository.BackOfficeApiRepository;
 import in.codifi.api.response.model.ResponseModel;
 import in.codifi.api.service.spec.IbackOfficeApiService;
 import in.codifi.api.utilities.CommonMethods;
@@ -18,6 +24,8 @@ import okhttp3.Response;
 @ApplicationScoped
 public class backOfficeApiService implements IbackOfficeApiService {
 
+	private static final Logger logger = LogManager.getLogger(backOfficeApiService.class);
+	
 	@Inject
 	CommonMethods commonMethods;
 
@@ -30,39 +38,54 @@ public class backOfficeApiService implements IbackOfficeApiService {
 	@Inject
 	ApplicationProperties props;
 	
+	@Inject
+	BackOfficeApiRepository backOfficeApiRepository;
+	
 	@Override
 	public ResponseModel callBckOfficeAPI(long applicationId) {
 	    ResponseModel responseModel = new ResponseModel();
-	    org.slf4j.Logger logger = LoggerFactory.getLogger(getClass());
 
 	    try {
-	        String apiUrl =props.getBackofficeApi();
+	        String apiUrl = props.getBackofficeApi();
 	        OkHttpClient client = new OkHttpClient();
 	        MediaType mediaType = MediaType.parse("application/json");
 	        String jsonContent = ibackOfficeHelper.generateJsonContenet(applicationId);
-	        System.out.println("the jsonContent"+jsonContent);
+	        System.out.println("the jsonContent" + jsonContent);
 	        logger.debug("JSON Content: {}", jsonContent);
 
 	        RequestBody body = RequestBody.create(mediaType, jsonContent);
 
 	        Request request = new Request.Builder()
 	                .url(apiUrl)
-	                .post(body)
-	                .addHeader("Content-Type", "application/json")
+	                .method("POST", body) // Use the appropriate method (POST or GET)
+	                .header("Content-Type", "application/json")
 	                .build();
 
 	        try (Response response = client.newCall(request).execute()) {
 	            if (response.isSuccessful()) {
 	                String responseBody = response.body().string();
+	                BackOfficeApiEntity backOfficeApiEntity = backOfficeApiRepository.findByapplicationId(applicationId);
+	                if (backOfficeApiEntity == null) {
+	                    backOfficeApiEntity = new BackOfficeApiEntity();
+	                    backOfficeApiEntity.setApplicationId(applicationId);
+	                }
+	                backOfficeApiEntity.setJsonData(jsonContent);
+	                backOfficeApiEntity.setReq(request.toString());
+	                backOfficeApiEntity.setRes(responseBody);
+	                backOfficeApiRepository.save(backOfficeApiEntity);
 	                iAdminController.sendRiskDoc(applicationId);
 	                logger.debug("Response Body: {}", responseBody);
 	                responseModel.setResult(responseBody);
 	            } else {
 	                logger.error("API request failed with status code: {}", response.code());
+	                logger.error("API URL: {}", apiUrl);
+	                logger.error("Request Headers: {}", request.headers());
+	                logger.error("Request Body: {}", jsonContent);
+	                // Log the exception stack trace
+	              //  logger.error("Exception Stack Trace: ", e);
 	                // Handle the error and set an appropriate response in responseModel
-	                responseModel.setResult ("API request failed with status code: " + response.code());
-	            }
-	        } catch (IOException e) {
+	                responseModel.setResult("API request failed with status code: " + response.code());
+	            }} catch (IOException e) {
 	            logger.error("An error occurred while making the API request.", e);
 	            // Handle the exception and set an appropriate response in responseModel
 	            responseModel.setResult("An error occurred while making the API request: " + e.getMessage());
@@ -75,4 +98,5 @@ public class backOfficeApiService implements IbackOfficeApiService {
 
 	    return responseModel;
 	}
+
 };

@@ -1,6 +1,9 @@
 package in.codifi.api.helper;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -65,7 +68,7 @@ public class backOfficeHelper {
 	@Inject
 	ApplicationProperties props;
 	
-	public  String generateJsonContenet(long  applicationId ) {
+	public  String generateJsonContenet(long  applicationId ) throws ParseException {
 		 String jsonData = "";
 		   Optional<ApplicationUserEntity> userEntity = applicationUserRepository.findById(applicationId);
 	        ProfileEntity getProfile = profileRepository.findByapplicationId(applicationId);
@@ -77,11 +80,22 @@ public class backOfficeHelper {
 	        if(userEntity!=null||getProfile!=null&&getBankDetails!=null||getAddress!=null&&responseCkyc!=null&&ivr!=null&&paymentEntity!=null) {
 	        	JsonObject jsonObject = new JsonObject();
 	            jsonObject.addProperty("key",props.getBackofficeKey());
-	            jsonObject.addProperty("cUcc ", userEntity.get().getUccCodePrefix()+userEntity.get().getUccCodeSuffix());
+	            jsonObject.addProperty("cUcc", userEntity.get().getUccCodePrefix()+userEntity.get().getUccCodeSuffix());
 	            jsonObject.addProperty("cClientName", userEntity.get().getUserName());
 	            jsonObject.addProperty("cFatherNm",getProfile.getFatherName());
 	            jsonObject.addProperty("cMotherNm", getProfile.getMotherName());
-	            jsonObject.addProperty("dBirth_Date",userEntity.get().getDob());
+	            String dobString = userEntity.get().getDob();
+	            System.out.println("Original DOB: " + dobString);
+	            // Define the date format of the input string
+	            SimpleDateFormat inputFormat = new SimpleDateFormat("dd-MM-yyyy");
+	            Date dobDate = inputFormat.parse(dobString);
+	            // Define the desired date format
+	            SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd");
+	            String formattedDob = outputFormat.format(dobDate);
+
+	            System.out.println("Formatted DOB: " + formattedDob);
+	            // Format the Date to the desired output format;
+	            jsonObject.addProperty("dBirth_Date",formattedDob);
 	            String Gender=getProfile.getGender();
 	            if(Gender!=null) {
 	            	if (Gender.equalsIgnoreCase("Male")) {
@@ -92,7 +106,7 @@ public class backOfficeHelper {
 	            		Gender="N";
 	            	}
 	            }
-	            jsonObject.addProperty("*cGender", Gender);
+	            jsonObject.addProperty("cGender", Gender);
 	            String marriedStatus=getProfile.getMaritalStatus();
 	            String cMaritalStatus=null;
 	            if(marriedStatus!=null) {
@@ -104,7 +118,7 @@ public class backOfficeHelper {
 	            		cMaritalStatus="03";
 	            	}
 	            }
-	            jsonObject.addProperty("*cMaritalStatus", cMaritalStatus);
+	            jsonObject.addProperty("cMaritalStatus", cMaritalStatus);
 	            jsonObject.addProperty("dMarriageAniv", "");
 	            jsonObject.addProperty("cNationality", "01");
 	            jsonObject.addProperty("cResIndStatus","Resident Individual");
@@ -142,10 +156,10 @@ public class backOfficeHelper {
 	            jsonObject.addProperty("cAnnualIncome ",income);
 	            jsonObject.addProperty("ClRiskProfile", "");
 	            jsonObject.addProperty("cBranchID", "HO");
-	            jsonObject.addProperty("*cPan_No", userEntity.get().getPanNumber());
+	            jsonObject.addProperty("cPan_No", userEntity.get().getPanNumber());
 	            jsonObject.addProperty("cPassport", "");
-	            jsonObject.addProperty("*dPPDate", "");
-	            jsonObject.addProperty("*dPPExpDate", "");
+	            jsonObject.addProperty("dPPDate", "");
+	            jsonObject.addProperty("dPPExpDate", "");
 	            jsonObject.addProperty("cVoterId", "");
 	            jsonObject.addProperty("cRationId", "");
 	            jsonObject.addProperty("cDriveLicense", "");
@@ -156,7 +170,20 @@ public class backOfficeHelper {
 	            jsonObject.addProperty("dDLExpDate ", "");
 	            jsonObject.addProperty("cAadhaar", getAddress.getAadharNo()!=null?getAddress.getAadharNo():"");
 	            jsonObject.addProperty("cPhotoIdPrf", "");
-	            jsonObject.addProperty("*cAddPrf", getAddress.getKraaddressproof()!=null?getAddress.getKraaddressproof():"ADHAAR");
+	            String kraAddressProof = null; // Initialize the variable to null
+	            kraAddressProof = getAddress.getKraaddressproof(); // Get the value from getAddress.getKraaddressproof()
+	            // Check if kraAddressProof is equal to "AADHAAR" (ignoring case)
+	            if(kraAddressProof!=null) {
+	            	System.out.println("THE RUNNNNNNNN");
+	            if (kraAddressProof.equalsIgnoreCase("AADHAAR")) {
+	                kraAddressProof = "ADHAAR"; // Set kraAddressProof to "ADHAAR"
+	            } else {
+	                kraAddressProof = getAddress.getKraaddressproof(); // Assign the original value back
+	            }}
+
+	            // Add a property "cAddPrf" to jsonObject with kraAddressProof as the value (or "ADHAAR" if it's null)
+	            jsonObject.addProperty("cAddPrf", kraAddressProof != null ? kraAddressProof : "ADHAAR");
+
 	            
 	            String PerAddress1=(getAddress.getIsKra()==1?getAddress.getKraPerAddress1():getAddress.getAddress1());
 				String PerAddress2=(getAddress.getIsKra()==1?getAddress.getKraPerAddress2():getAddress.getAddress2());
@@ -166,13 +193,19 @@ public class backOfficeHelper {
 				String dist=(getAddress.getIsKra()==1?getAddress.getKraPerCity():getAddress.getDistrict());
 				String Pincode=(getAddress.getIsKra()==1?Integer.toString(getAddress.getKraPerPin()):getAddress.getPincode().toString());
 	            //address
-				 KraKeyValueEntity kraKeyValueEntity=kraKeyValueRepository.findByMasterIdAndMasterNameAndKraValue("STATE","1", State);
+				String kraproof="";
+				KraKeyValueEntity kraKeyValueEntityproof=null;
+				if(getAddress.getIsKra()==1) {
+					kraproof=getAddress.getKraaddressproof();
+					kraKeyValueEntityproof=kraKeyValueRepository.findByMasterIdAndMasterNameAndKraValue("PROOF OF ADDRESS","9", kraproof);
+				}
+				 KraKeyValueEntity kraKeyValueEntityState=kraKeyValueRepository.findByMasterIdAndMasterNameAndKraValue("STATE","1", State);
 	            jsonObject.addProperty("cAdd1", PerAddress1);
 	            jsonObject.addProperty("cAdd2", PerAddress2);
 	            jsonObject.addProperty("cAdd3",PerAddress3);
 	            jsonObject.addProperty("cCity", City);
 	            jsonObject.addProperty("cPin", Pincode);
-	            jsonObject.addProperty("*cStateCd", kraKeyValueEntity!=null?kraKeyValueEntity.getKraKey():"");
+	            jsonObject.addProperty("cStateCd", kraKeyValueEntityState!=null?kraKeyValueEntityState.getKraKey():"");
 	            jsonObject.addProperty("cCountry", "India");
 	            jsonObject.addProperty("cPhone", "");
 	            jsonObject.addProperty("cFax", "");
@@ -183,7 +216,7 @@ public class backOfficeHelper {
 	            jsonObject.addProperty("cResAdd3", PerAddress3);
 	            jsonObject.addProperty("cResCity",City);
 	            jsonObject.addProperty("cResPin",  Pincode);
-	            jsonObject.addProperty("cResStateCd",kraKeyValueEntity!=null?kraKeyValueEntity.getKraKey():"");
+	            jsonObject.addProperty("cResStateCd",kraKeyValueEntityState!=null?kraKeyValueEntityState.getKraKey():"");
 	            
 	            jsonObject.addProperty("cResCountry", "India");
 	            jsonObject.addProperty("cResPhone", "");
@@ -201,20 +234,20 @@ public class backOfficeHelper {
 	            jsonObject.addProperty("cKraAnnualIncDt", "");
 	            
 	            jsonObject.addProperty("cKraPEP", "");
-	            jsonObject.addProperty("cKraCorrAddPrf",getAddress.getKraaddressproof()!=null?getAddress.getKraaddressproof():"");
+	            jsonObject.addProperty("cKraCorrAddPrf",kraKeyValueEntityproof!=null?kraKeyValueEntityproof.getKraKey():"");
 	            jsonObject.addProperty("cKraCorrAddPrfId", getAddress.getKraproofIdNumber()!=null?getAddress.getKraproofIdNumber():"");
 	            jsonObject.addProperty("cKraCorrAddPrfDt", "");
-	            jsonObject.addProperty("cKraPermAddPrf", getAddress.getKraaddressproof()!=null?getAddress.getKraaddressproof():"");
+	            jsonObject.addProperty("cKraPermAddPrf", kraKeyValueEntityproof!=null?kraKeyValueEntityproof.getKraKey():"");
 	            
 	            jsonObject.addProperty("cKraPermAddPrfId",  getAddress.getKraproofIdNumber()!=null?getAddress.getKraproofIdNumber():"");
 	            jsonObject.addProperty("cKraPermAddPrfDt", "");
 	            jsonObject.addProperty("cKraPermCorrSame", "N");
 	           
-	            jsonObject.addProperty("cKraCorrAddState",kraKeyValueEntity!=null?kraKeyValueEntity.getKraKey():"");
-	            jsonObject.addProperty("cKraPermAddState",kraKeyValueEntity!=null?kraKeyValueEntity.getKraKey():"");
-	            jsonObject.addProperty("cKraCorrAddCntry", "101");
-	            jsonObject.addProperty("cKraPermAddCntry", "101");
-	            jsonObject.addProperty("cKraIdProof", getAddress.getKraproofIdNumber()!=null?getAddress.getKraproofIdNumber():"");
+	            jsonObject.addProperty("cKraCorrAddState",kraKeyValueEntityState!=null?kraKeyValueEntityState.getKraKey():"");
+	            jsonObject.addProperty("cKraPermAddState",kraKeyValueEntityState!=null?kraKeyValueEntityState.getKraKey():"");
+	            jsonObject.addProperty("cKraCorrAddCntry", "01");
+	            jsonObject.addProperty("cKraPermAddCntry", "01");
+	            jsonObject.addProperty("cKraIdProof", kraKeyValueEntityproof!=null?kraKeyValueEntityproof.getKraKey():"");
 	            String getKraCity=callBCCity(City);
 	            System.out.println("the getKraCity"+getKraCity);
 	            jsonObject.addProperty("cKraStateCity","");
@@ -241,26 +274,26 @@ public class backOfficeHelper {
 	            jsonObject.addProperty("cIntroCntry", "");
 	            jsonObject.addProperty("cIntroPhone", "");
 	            jsonObject.addProperty("cIntroFather", "");
-	            jsonObject.addProperty("cIntroRel", "YYYY-MM-DDTHH:mm:ss");
+	            jsonObject.addProperty("cIntroRel", "");
 	            jsonObject.addProperty("cIntroIdPrf", "");
 	            jsonObject.addProperty("cIntroId", referralEntity!=null? referralEntity.getReferralBy():"");
 	            jsonObject.addProperty("cIntroIdExp","");
 	            
 	            //Contact Person 1
-	            jsonObject.addProperty("*cContactPerson", userEntity.get().getUserName());
-	            jsonObject.addProperty("*cCpDesignation", occupation);
-	            jsonObject.addProperty("*cCpAddress", PerAddress1);
-	            jsonObject.addProperty("*cCpPhone",userEntity.get().getMobileNo());
+	            jsonObject.addProperty("cContactPerson", userEntity.get().getUserName());
+	            jsonObject.addProperty("cCpDesignation", occupation);
+	            jsonObject.addProperty("cCpAddress", PerAddress1);
+	            jsonObject.addProperty("cCpPhone",userEntity.get().getMobileNo());
 	            jsonObject.addProperty("cCpCity", City);
-	            jsonObject.addProperty("*cCpPin", Pincode);
-	            jsonObject.addProperty("*cCpState", kraKeyValueEntity!=null?kraKeyValueEntity.getKraKey():"");
-	            jsonObject.addProperty("*cCpCountry", "India");
+	            jsonObject.addProperty("cCpPin", Pincode);
+	            jsonObject.addProperty("cCpState",kraKeyValueEntityState!=null?kraKeyValueEntityState.getKraKey():"");
+	            jsonObject.addProperty("cCpCountry", "01");
 	            //Primary Bank Details
-	            jsonObject.addProperty("*cIfsc",getBankDetails.getIfsc()!=null? getBankDetails.getIfsc():"");
+	            jsonObject.addProperty("cIfsc",getBankDetails.getIfsc()!=null? getBankDetails.getIfsc():"");
 	            jsonObject.addProperty("cMicr",getBankDetails.getMicr());
 	            jsonObject.addProperty("cAcType", "Savings");
-	            jsonObject.addProperty("*cAcNo", getBankDetails.getAccountNo());
-	            jsonObject.addProperty("*cBankClientName", userEntity.get().getUserName());
+	            jsonObject.addProperty("cAcNo", getBankDetails.getAccountNo());
+	            jsonObject.addProperty("cBankClientName", userEntity.get().getUserName());
 	            
 	            //Secondary Bank Details
 	            jsonObject.addProperty("cSecIfsc", "");
