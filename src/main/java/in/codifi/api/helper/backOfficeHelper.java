@@ -280,14 +280,14 @@ public class backOfficeHelper {
 	            jsonObject.addProperty("cIntroIdExp","");
 	            
 	            //Contact Person 1
-	            jsonObject.addProperty("cContactPerson", userEntity.get().getUserName());
-	            jsonObject.addProperty("cCpDesignation", occupation);
-	            jsonObject.addProperty("cCpAddress", PerAddress1);
-	            jsonObject.addProperty("cCpPhone",userEntity.get().getMobileNo());
-	            jsonObject.addProperty("cCpCity", City);
-	            jsonObject.addProperty("cCpPin", Pincode);
-	            jsonObject.addProperty("cCpState",kraKeyValueEntityState!=null?kraKeyValueEntityState.getKraKey():"");
-	            jsonObject.addProperty("cCpCountry", "01");
+	            jsonObject.addProperty("cContactPerson","");
+	            jsonObject.addProperty("cCpDesignation", "");
+	            jsonObject.addProperty("cCpAddress","");
+	            jsonObject.addProperty("cCpPhone","");
+	            jsonObject.addProperty("cCpCity", "");
+	            jsonObject.addProperty("cCpPin", "");
+	            jsonObject.addProperty("cCpState","");
+	            jsonObject.addProperty("cCpCountry","");
 	            //Primary Bank Details
 	            jsonObject.addProperty("cIfsc",getBankDetails.getIfsc()!=null? getBankDetails.getIfsc():"");
 	            jsonObject.addProperty("cMicr",getBankDetails.getMicr());

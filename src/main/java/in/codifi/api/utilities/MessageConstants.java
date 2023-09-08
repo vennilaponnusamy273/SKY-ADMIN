@@ -45,6 +45,7 @@ public class MessageConstants {
 	public static final String EKYC_URL = "https://kyc.skybroking.com/?refBy=";
 	
 	public static final String FAILED_HTTP_CODE = "Failed : HTTP error code :";
+	//Push to Back Office
 	public static final String WRONG_USER_ID = "User Id is Wrong";
 
 }
