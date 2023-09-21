@@ -183,14 +183,38 @@ public class backOfficeHelper {
 
 	            // Add a property "cAddPrf" to jsonObject with kraAddressProof as the value (or "ADHAAR" if it's null)
 	            jsonObject.addProperty("cAddPrf", kraAddressProof != null ? kraAddressProof : "ADHAAR");
+	            StringBuilder addressBuilder = new StringBuilder();
+	            if (getAddress != null) {
+				    if (getAddress.getFlatNo() != null) {
+				        addressBuilder.append(getAddress.getFlatNo());
+				    }
 
+				    if (getAddress.getStreet() != null) {
+				        if (addressBuilder.length() > 0) {
+				            addressBuilder.append(" ");
+				        }
+				        addressBuilder.append(getAddress.getStreet());
+				    }
+				    if (getAddress.getLandmark() != null) {
+				        if (addressBuilder.length() > 0) {
+				            addressBuilder.append(" ");
+				        }
+				        addressBuilder.append(getAddress.getLandmark());
+				    }
+				    if (getAddress.getAddress1() != null) {
+				        if (addressBuilder.length() > 0) {
+				            addressBuilder.append(" ");
+				        }
+				        addressBuilder.append(getAddress.getAddress1());
+				    }}
+				    String fullAddress = addressBuilder.toString();
 	            
-	            String PerAddress1=(getAddress.getIsKra()==1?getAddress.getKraPerAddress1():getAddress.getAddress1());
+	            String PerAddress1=(getAddress.getIsKra()==1?getAddress.getKraPerAddress1():fullAddress);
 				String PerAddress2=(getAddress.getIsKra()==1?getAddress.getKraPerAddress2():getAddress.getAddress2());
 				String PerAddress3=(getAddress.getIsKra()==1?getAddress.getKraPerAddress3():getAddress.getAddress2());
 				String State=(getAddress.getIsKra()==1?getAddress.getKraPerState():getAddress.getState());
 				String City=(getAddress.getIsKra()==1?getAddress.getKraPerCity():getAddress.getLandmark());
-				String dist=(getAddress.getIsKra()==1?getAddress.getKraPerCity():getAddress.getDistrict());
+				//String dist=(getAddress.getIsKra()==1?getAddress.getKraPerCity():getAddress.getDistrict());
 				String Pincode=(getAddress.getIsKra()==1?Integer.toString(getAddress.getKraPerPin()):getAddress.getPincode().toString());
 	            //address
 				String kraproof="";
