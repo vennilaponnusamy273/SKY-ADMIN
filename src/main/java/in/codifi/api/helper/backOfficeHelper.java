@@ -3,6 +3,9 @@ package in.codifi.api.helper;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Optional;
 
@@ -124,22 +127,29 @@ public class backOfficeHelper {
 	            jsonObject.addProperty("cResIndStatus","Resident Individual");
 	            
 	            String occupation = "";
-				if (StringUtil.isEqual(getProfile.getOccupation(), "Private Sectorr")) {
+	            String Kraoccupation = "";
+				if (StringUtil.isEqual(getProfile.getOccupation(), "Private Sector")) {
 					occupation = "Employed";
+					Kraoccupation="01";
 				} else if (StringUtil.isEqual(getProfile.getOccupation(), "Public Sector")) {
-					occupation = "Employed";				
+					occupation = "Employed";	
+					Kraoccupation="02";
 				} else if (StringUtil.isEqual(getProfile.getOccupation(), "Business")) {
 					occupation = "Business";
+					Kraoccupation="03";
 				} else if (StringUtil.isEqual(getProfile.getOccupation(), "Professional")) {
 					occupation = "Professional";
+					Kraoccupation="04";
 				} else if (StringUtil.isEqual(getProfile.getOccupation(), "House Wife")) {
 					occupation = "House Wife";
+					Kraoccupation="07";
 				} else if (StringUtil.isEqual(getProfile.getOccupation(), "Student")) {
 					occupation = "Student";
+					Kraoccupation="08";
 				} else if (StringUtil.isEqual(getProfile.getOccupation(), "Others")) {
 					occupation = "Others";
+					Kraoccupation="99";
 				}	   
-				
 				  String income  = "";
 				  if (StringUtil.isEqual(getProfile.getAnnualIncome(), "0-1 lakh")) {
 					  income = "01";
@@ -215,7 +225,9 @@ public class backOfficeHelper {
 				String State=(getAddress.getIsKra()==1?getAddress.getKraPerState():getAddress.getState());
 				String City=(getAddress.getIsKra()==1?getAddress.getKraPerCity():getAddress.getLandmark());
 				//String dist=(getAddress.getIsKra()==1?getAddress.getKraPerCity():getAddress.getDistrict());
-				String Pincode=(getAddress.getIsKra()==1?Integer.toString(getAddress.getKraPerPin()):getAddress.getPincode().toString());
+				Long pincodeValue = getAddress.getPincode();
+				String Pincode = (pincodeValue != null ? pincodeValue.toString() : "");
+				//String Pincode = (getAddress.getIsKra() == 1 ? Integer.toString(getAddress.getKraPerPin()) : getAddress.getPincode().toString());
 	            //address
 				String kraproof="";
 				KraKeyValueEntity kraKeyValueEntityproof=null;
@@ -252,7 +264,7 @@ public class backOfficeHelper {
 	            jsonObject.addProperty("FmlyMobileFlag", 0);
 	            //KRA
 	            jsonObject.addProperty("cKraApplDt", "");
-	            jsonObject.addProperty("cKraOccupation", occupation);
+	            jsonObject.addProperty("cKraOccupation", Kraoccupation);
 	            jsonObject.addProperty("cKraOccupationDtlOth", "");
 	            jsonObject.addProperty("cKraAnnualInc", income);
 	            jsonObject.addProperty("cKraAnnualIncDt", "");
@@ -389,15 +401,36 @@ public class backOfficeHelper {
 	            jsonObject.addProperty("NomOptOutDt", "");
 	            
 	            //brokerage
-	            
-	            jsonObject.addProperty("cBrkgBasketNSE",  "");
-	            jsonObject.addProperty("cBrkgBasketBSE",  "");
-	            jsonObject.addProperty("cBrkgBasketFO",  "");
-	            jsonObject.addProperty("cBrkgBasketCDS",  "");
-	            jsonObject.addProperty("cBrkgBasketCOMM",  "");
-	            jsonObject.addProperty("cBrkgBasketBSEFO",  "");
-	            jsonObject.addProperty("cBrkgBasketBSECDS",  "");
-	            jsonObject.addProperty("dBrkgEffectDate",  "");
+	            String brokerageAcc = SegmentEntity.getBrokerageacc();
+
+	            if (brokerageAcc != null) {
+	                String value = "";
+
+	                if (brokerageAcc.equalsIgnoreCase("sky prime")) {
+	                    value = "PRIME";
+	                } else if (brokerageAcc.equalsIgnoreCase("sky discount")) {
+	                    value = "DISCOUNT";
+	                }
+	                jsonObject.addProperty("cBrkgBasketNSE", value);
+	                jsonObject.addProperty("cBrkgBasketBSE", value);
+	                jsonObject.addProperty("cBrkgBasketFO", value);
+	                jsonObject.addProperty("cBrkgBasketCDS", value);
+	                jsonObject.addProperty("cBrkgBasketCOMM", value);
+	                jsonObject.addProperty("cBrkgBasketBSEFO", value);
+	                jsonObject.addProperty("cBrkgBasketBSECDS", value);
+	            } else {
+	                jsonObject.addProperty("cBrkgBasketNSE", "");
+	                jsonObject.addProperty("cBrkgBasketBSE", "");
+	                jsonObject.addProperty("cBrkgBasketFO", "");
+	                jsonObject.addProperty("cBrkgBasketCDS", "");
+	                jsonObject.addProperty("cBrkgBasketCOMM", "");
+	                jsonObject.addProperty("cBrkgBasketBSEFO", "");
+	                jsonObject.addProperty("cBrkgBasketBSECDS", "");
+	            }
+	            ZonedDateTime currentDateTime = ZonedDateTime.now(ZoneOffset.UTC);
+	            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+	            String formattedDateTime = currentDateTime.format(formatter);
+	            jsonObject.addProperty("dBrkgEffectDate", formattedDateTime);
 	            jsonObject.addProperty("nDelCMBrkg",  "");
 	            jsonObject.addProperty("nDelCMBrkgMin", "");
 	            jsonObject.addProperty("nSqCMBrkg",  "");
