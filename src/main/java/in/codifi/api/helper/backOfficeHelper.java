@@ -184,7 +184,7 @@ public class backOfficeHelper {
 	            kraAddressProof = getAddress.getKraaddressproof(); // Get the value from getAddress.getKraaddressproof()
 	            // Check if kraAddressProof is equal to "AADHAAR" (ignoring case)
 	            if(kraAddressProof!=null) {
-	            	System.out.println("THE RUNNNNNNNN");
+	            	System.out.println("THE KRA ADDRESS PROOF IS RUNNING");
 	            if (kraAddressProof.equalsIgnoreCase("AADHAAR")) {
 	                kraAddressProof = "ADHAAR"; // Set kraAddressProof to "ADHAAR"
 	            } else {
@@ -412,21 +412,18 @@ public class backOfficeHelper {
 	                    value = "DISCOUNT";
 	                }
 	                jsonObject.addProperty("cBrkgBasketNSE", value);
-	                jsonObject.addProperty("cBrkgBasketBSE", value);
 	                jsonObject.addProperty("cBrkgBasketFO", value);
 	                jsonObject.addProperty("cBrkgBasketCDS", value);
 	                jsonObject.addProperty("cBrkgBasketCOMM", value);
-	                jsonObject.addProperty("cBrkgBasketBSEFO", value);
-	                jsonObject.addProperty("cBrkgBasketBSECDS", value);
 	            } else {
 	                jsonObject.addProperty("cBrkgBasketNSE", "");
-	                jsonObject.addProperty("cBrkgBasketBSE", "");
 	                jsonObject.addProperty("cBrkgBasketFO", "");
 	                jsonObject.addProperty("cBrkgBasketCDS", "");
 	                jsonObject.addProperty("cBrkgBasketCOMM", "");
-	                jsonObject.addProperty("cBrkgBasketBSEFO", "");
-	                jsonObject.addProperty("cBrkgBasketBSECDS", "");
 	            }
+	            jsonObject.addProperty("cBrkgBasketBSE", "");
+	            jsonObject.addProperty("cBrkgBasketBSEFO", "");
+                jsonObject.addProperty("cBrkgBasketBSECDS", "");
 	            ZonedDateTime currentDateTime = ZonedDateTime.now(ZoneOffset.UTC);
 	            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 	            String formattedDateTime = currentDateTime.format(formatter);
