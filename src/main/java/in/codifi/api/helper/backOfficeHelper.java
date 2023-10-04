@@ -400,34 +400,34 @@ public class backOfficeHelper {
 	            //nominee opt out 
 	            jsonObject.addProperty("NomOptOutDt", "");
 	            
-	            //brokerage
-	            String brokerageAcc = SegmentEntity.getBrokerageacc();
-
-	            if (brokerageAcc != null) {
-	                String value = "";
-
-	                if (brokerageAcc.equalsIgnoreCase("sky prime")) {
-	                    value = "PRIME";
-	                } else if (brokerageAcc.equalsIgnoreCase("sky discount")) {
-	                    value = "DISCOUNT";
-	                }
-	                jsonObject.addProperty("cBrkgBasketNSE", value);
-	                jsonObject.addProperty("cBrkgBasketFO", value);
-	                jsonObject.addProperty("cBrkgBasketCDS", value);
-	                jsonObject.addProperty("cBrkgBasketCOMM", value);
-	            } else {
+//	            //brokerage
+//	            String brokerageAcc = SegmentEntity.getBrokerageacc();
+//
+//	            if (brokerageAcc != null) {
+//	                String value = "";
+//
+//	                if (brokerageAcc.equalsIgnoreCase("sky prime")) {
+//	                    value = "PRIME";
+//	                } else if (brokerageAcc.equalsIgnoreCase("sky discount")) {
+//	                    value = "DISCOUNT";
+//	                }
+//	                jsonObject.addProperty("cBrkgBasketNSE", value);
+//	                jsonObject.addProperty("cBrkgBasketFO", value);
+//	                jsonObject.addProperty("cBrkgBasketCDS", value);
+//	                jsonObject.addProperty("cBrkgBasketCOMM", value);
+//	            } else {
 	                jsonObject.addProperty("cBrkgBasketNSE", "");
 	                jsonObject.addProperty("cBrkgBasketFO", "");
 	                jsonObject.addProperty("cBrkgBasketCDS", "");
 	                jsonObject.addProperty("cBrkgBasketCOMM", "");
-	            }
+	            //}
 	            jsonObject.addProperty("cBrkgBasketBSE", "");
 	            jsonObject.addProperty("cBrkgBasketBSEFO", "");
                 jsonObject.addProperty("cBrkgBasketBSECDS", "");
-	            ZonedDateTime currentDateTime = ZonedDateTime.now(ZoneOffset.UTC);
-	            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-	            String formattedDateTime = currentDateTime.format(formatter);
-	            jsonObject.addProperty("dBrkgEffectDate", formattedDateTime);
+//	            ZonedDateTime currentDateTime = ZonedDateTime.now(ZoneOffset.UTC);
+//	            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+//	            String formattedDateTime = currentDateTime.format(formatter);
+	            jsonObject.addProperty("dBrkgEffectDate", "");
 	            jsonObject.addProperty("nDelCMBrkg",  "");
 	            jsonObject.addProperty("nDelCMBrkgMin", "");
 	            jsonObject.addProperty("nSqCMBrkg",  "");
