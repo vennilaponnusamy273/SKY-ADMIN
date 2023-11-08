@@ -192,7 +192,7 @@ public class backOfficeHelper {
 	            }}
 
 	            // Add a property "cAddPrf" to jsonObject with kraAddressProof as the value (or "ADHAAR" if it's null)
-	            jsonObject.addProperty("cAddPrf", kraAddressProof != null ? kraAddressProof : "ADHAAR");
+	            jsonObject.addProperty("cAddPrf","ADHAAR");
 	            StringBuilder addressBuilder = new StringBuilder();
 	            if (getAddress != null) {
 					   /** if (getAddress.getFlatNo() != null) {
