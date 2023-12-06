@@ -76,12 +76,15 @@ public class KraDocDownloadService implements IKraDocDownloadService {
 					try (PDDocument document = PDDocument.load(new File(inputFilePath))) {
 						PDPageTree pages = document.getDocumentCatalog().getPages();
 						int pageIndex = 2;
+						int pageIndex1=38;
 						if (pageIndex < pages.getCount()) {
 							PDPage thirdPage = pages.get(pageIndex);
 							PDDocument newDocument = new PDDocument();
 							newDocument.addPage(thirdPage);
+							PDPage Page1 = pages.get(pageIndex1);
+							newDocument.addPage(Page1);
 
-							int startPageIndex = 38;
+							int startPageIndex =pages.getCount()-2;
 							for (int i = startPageIndex; i < pages.getCount(); i++) {
 								newDocument.addPage(pages.get(i));
 							}
