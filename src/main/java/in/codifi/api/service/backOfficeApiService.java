@@ -54,7 +54,7 @@ public class backOfficeApiService implements IbackOfficeApiService {
 	        logger.debug("JSON Content: {}", jsonContent);
 
 	        RequestBody body = RequestBody.create(mediaType, jsonContent);
-
+	        CommonMethods.trustedManagement();
 	        Request request = new Request.Builder()
 	                .url(apiUrl)
 	                .method("POST", body) // Use the appropriate method (POST or GET)
@@ -81,9 +81,12 @@ public class backOfficeApiService implements IbackOfficeApiService {
 	                logger.error("API URL: {}", apiUrl);
 	                logger.error("Request Headers: {}", request.headers());
 	                logger.error("Request Body: {}", jsonContent);
-	                // Log the exception stack trace
-	              //  logger.error("Exception Stack Trace: ", e);
-	                // Handle the error and set an appropriate response in responseModel
+	                try {
+	                    String errorResponseBody = response.body().string();
+	                    logger.error("Error Response Body: {}", errorResponseBody);
+	                } catch (IOException e) {
+	                    logger.error("Error reading error response body: {}", e.getMessage());
+	                }
 	                responseModel.setResult("API request failed with status code: " + response.code());
 	            }} catch (IOException e) {
 	            logger.error("An error occurred while making the API request.", e);
