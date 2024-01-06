@@ -53,5 +53,7 @@ public class ApiStatusEntity extends CommonEntity implements Serializable {
 
 	@Column(name = "docType")
 	private String docType;
+	@Column(name = "nomineeid")
+	private Long nomineeId;
 
 }
