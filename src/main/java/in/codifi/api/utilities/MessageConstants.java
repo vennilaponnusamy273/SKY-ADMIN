@@ -47,5 +47,6 @@ public class MessageConstants {
 	public static final String FAILED_HTTP_CODE = "Failed : HTTP error code :";
 	//Push to Back Office
 	public static final String WRONG_USER_ID = "User Id is Wrong";
+	public static final String DATE_NULL = "Date is null";
 
 }
