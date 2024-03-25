@@ -13,6 +13,6 @@ public interface IMisExcelService {
 	 * @return
 	 */
 	
-	Response ExcelDownload(String frmDate, String toDate);
+	Response ExcelDownload1(String frmDate, String toDate);
 
 }

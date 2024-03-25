@@ -21,7 +21,7 @@ public class MisExcelController implements IMisExcelController {
 	@Override
 	public Response ExcelDownload(String frmDate, String toDate) {
 		if (frmDate != null && toDate != null) {
-			return MisExcelService.ExcelDownload(frmDate, toDate);
+			return MisExcelService.ExcelDownload1(frmDate, toDate);
 		} else {
 			if (toDate == null && toDate == null) {
 				return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(MessageConstants.DATE_NULL)
