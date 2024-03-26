@@ -11,7 +11,7 @@ public class MISModel {
 	public String totalAccOpen;
 	public String totalAccEsign;
 	public String totalAccBo;
-	
+	public String referral;
 	public long totalAccOpenCount;
 	public long totalAccEsignCount;
 	public long totalAccBoCount;

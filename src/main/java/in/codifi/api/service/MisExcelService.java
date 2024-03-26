@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -23,20 +24,21 @@ import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.VerticalAlignment;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import in.codifi.api.config.ApplicationProperties;
 import in.codifi.api.entity.ApplicationUserEntity;
-import in.codifi.api.entity.BackOfficeApiEntity;
-import in.codifi.api.entity.DocumentEntity;
+import in.codifi.api.entity.ReferralEntity;
 import in.codifi.api.repository.ApplicationUserRepository;
 import in.codifi.api.repository.BackOfficeApiRepository;
 import in.codifi.api.repository.DocumentEntityRepository;
@@ -66,108 +68,337 @@ public class MisExcelService implements IMisExcelService {
 
 	@Override
 	public Response ExcelDownload1(String frmDate, String toDate) {
-		try {
-			List<ApplicationUserEntity> userEntity = null;
-			List<DocumentEntity> document = null;
-			List<BackOfficeApiEntity> backOfficeApiEntity = null;
-			List<MISModel> misModels = new ArrayList<>();
+	    try {
+	        List<MISModel> misModels = prepareMISModels(frmDate, toDate);
+	        for (MISModel model : misModels) {
+	            System.out.println("Date: " + model.getDate());
+	            System.out.println("Referral: " + model.getReferral());
+	            System.out.println("TotalAccOpen: " + model.getTotalAccOpen());
+	            System.out.println("TotalAccEsign: " + model.getTotalAccEsign());
+	            System.out.println("TotalAccBo: " + model.getTotalAccBo());
+	            System.out.println("---------------------------------");
+	        }
+	        String filePath = generateExcelSheet(misModels);
+	        File file = new File(filePath);
+	        return Response.ok(file)
+	                .header("Content-Disposition", "attachment; filename=\"" + file.getName() + "\"")
+	                .build();
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return Response.serverError().entity("An error occurred: " + e.getMessage()).build();
+	    }
+	}
+	public List<MISModel> prepareMISModels(String frmDate, String toDate) {
+	    List<MISModel> misModels = new ArrayList<>();
+	    DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+	    LocalDate fromDate = LocalDate.parse(frmDate, inputFormatter);
+	    LocalDate toDateObj = LocalDate.parse(toDate, inputFormatter);
 
-			DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-			LocalDate fromDate = LocalDate.parse(frmDate, inputFormatter);
-			LocalDate toDateObj = LocalDate.parse(toDate, inputFormatter);
+	    // Get existingNotifyEntity for the specified date range
+	    List<ReferralEntity> existingNotifyEntity = getExistingNotifyEntity(frmDate, toDate);
 
-			userEntity = applicationUserRepository.findByDate(
-					Date.from(fromDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant()), Date.from(toDateObj
-							.plusDays(1).atStartOfDay().minusNanos(1).atZone(ZoneId.systemDefault()).toInstant()));
-//
-//			document = docrepository.findByDate(
-//					Date.from(fromDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant()), Date.from(toDateObj
-//							.plusDays(1).atStartOfDay().minusNanos(1).atZone(ZoneId.systemDefault()).toInstant()));
+	    // Create a map to store MISModel for each referral and date
+	    Map<String, Map<String, MISModel>> referralDateMap = new HashMap<>();
 
-			backOfficeApiEntity = backOfficeApiRepository.findByDate(
-					Date.from(fromDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant()), Date.from(toDateObj
-							.plusDays(1).atStartOfDay().minusNanos(1).atZone(ZoneId.systemDefault()).toInstant()));
+	    // Iterate over each referral entity
+	    for (ReferralEntity referral : existingNotifyEntity) {
+	        // Convert referral date to LocalDate
+	        LocalDate referralDate = referral.getCreatedOn().toInstant()
+	                .atZone(ZoneId.systemDefault())
+	                .toLocalDateTime()
+	                .toLocalDate();
+	        
+	        // Format referral date as dd-MM-yyyy
+	        String formattedReferralDate = referralDate.format(inputFormatter);
 
-			List<String> existingNotifyEntity = notifyRepository.findByDate(
-					Date.from(fromDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant()), Date.from(toDateObj
-							.plusDays(1).atStartOfDay().minusNanos(1).atZone(ZoneId.systemDefault()).toInstant()));
+	        // Get or create the map for the referral for the current date
+	        Map<String, MISModel> referralMap = referralDateMap.computeIfAbsent(formattedReferralDate, k -> new HashMap<>());
 
-			if (userEntity != null) {
-				for (LocalDate date = fromDate; date.isBefore(toDateObj.plusDays(1)); date = date.plusDays(1)) {
-					int totalAccOpenOnDate = 0;
-					int totalEsignDateOnDate = 0;
-					int totalBODateOnDate = 0;
+	        // Get or create MISModel for the referral for the current date
+	        MISModel misModel = referralMap.computeIfAbsent(referral.getRefByName(), k -> {
+	            MISModel newModel = new MISModel();
+	            newModel.setDate(formattedReferralDate); // Set the date
+	            newModel.setReferral(referral.getRefByName()); // Set the referral name
+	            newModel.setTotalAccOpen("0"); // Initialize to "0"
+	            newModel.setTotalAccEsign("0"); // Initialize to "0"
+	            newModel.setTotalAccBo("0"); // Initialize to "0"
+	            return newModel;
+	        });
 
-					for (ApplicationUserEntity entity : userEntity) {
-						LocalDate entityDate = entity.getCreatedOn().toInstant().atZone(ZoneId.systemDefault())
-								.toLocalDate();
-						if (entityDate.isEqual(date)) {
-							totalAccOpenOnDate++;
-						}
-					}
+	        // Increment counts based on status
+	        ApplicationUserEntity userEntity = applicationUserRepository.findByMobileNo(referral.getMobileNo());
+	        if (userEntity != null) {
+	            String status = determineStatus(userEntity, referral);
+	            if ("In Progress".equals(status)) {
+	                misModel.setTotalAccOpen(String.valueOf(Integer.parseInt(misModel.getTotalAccOpen()) + 1));
+	            } else if ("Submitted".equals(status)) {
+	                misModel.setTotalAccEsign(String.valueOf(Integer.parseInt(misModel.getTotalAccEsign()) + 1));
+	            } else if ("Completed".equals(status)) {
+	                misModel.setTotalAccBo(String.valueOf(Integer.parseInt(misModel.getTotalAccBo()) + 1));
+	            }
+	        }
 
-//					if (document != null) {
-//						for (DocumentEntity entity : document) {
-//							LocalDate entityDate = entity.getCreatedOn().toInstant().atZone(ZoneId.systemDefault())
-//									.toLocalDate();
-//							if (entityDate.isEqual(date)) {
-//								totalEsignDateOnDate++;
-//							}
-//						}
-//					}
+	        // Put the updated MISModel back to the referral map
+	        referralMap.put(referral.getRefByName(), misModel);
 
-					if (backOfficeApiEntity != null) {
-						for (BackOfficeApiEntity entity : backOfficeApiEntity) {
-							LocalDate entityDate = entity.getCreatedOn().toInstant().atZone(ZoneId.systemDefault())
-									.toLocalDate();
-							if (entityDate.isEqual(date)) {
-								totalBODateOnDate++;
-							}
-						}
+	        // Put the referral map back to the date map
+	        referralDateMap.put(formattedReferralDate, referralMap);
+	    }
 
-					}
+	    // Convert the referralDateMap to a list of MISModel
+	    for (Map<String, MISModel> referralMap : referralDateMap.values()) {
+	        misModels.addAll(referralMap.values());
+	    }
 
-					for (String refByName : existingNotifyEntity) {
-						System.out.println(refByName);
-					}
-
-					MISModel misModel = new MISModel();
-					misModel.setDate(date.toString());
-					misModel.setTotalAccOpen(String.valueOf(totalAccOpenOnDate));
-					misModel.setTotalAccEsign(String.valueOf(totalAccOpenOnDate - totalBODateOnDate));
-					misModel.setTotalAccBo(String.valueOf(totalBODateOnDate));
-					misModels.add(misModel);
-				}
-				// Calculate overall counts
-				long overallTotalAccOpen = 0;
-				long overallTotalAccEsign = 0;
-				long overallTotalAccBo = 0;
-				for (MISModel model : misModels) {
-					overallTotalAccOpen += Long.parseLong(model.getTotalAccOpen());
-					overallTotalAccEsign += Long.parseLong(model.getTotalAccEsign());
-					overallTotalAccBo += Long.parseLong(model.getTotalAccBo());
-				}
-
-				// Add overall counts to a new MISModel object
-				MISModel overallCounts = new MISModel();
-				// overallCounts.setDate("TOTAL");
-				overallCounts.setTotalAccOpen(String.valueOf(overallTotalAccOpen));
-				overallCounts.setTotalAccEsign(String.valueOf(overallTotalAccEsign));
-				overallCounts.setTotalAccBo(String.valueOf(overallTotalAccBo));
-				misModels.add(overallCounts);
-			}
-
-			String filePath = generateExcelSheet1(misModels, existingNotifyEntity);
-			File file = new File(filePath);
-			return Response.ok(file).header("Content-Disposition", "attachment; filename=\"" + file.getName() + "\"")
-					.build();
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			return Response.serverError().entity("An error occurred: " + e.getMessage()).build();
-		}
+	    return misModels;
 	}
 
+
+
+    public List<ReferralEntity> getExistingNotifyEntity(String frmDate, String toDate) {
+        DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        LocalDate fromDate = LocalDate.parse(frmDate, inputFormatter);
+        LocalDate toDateObj = LocalDate.parse(toDate, inputFormatter);
+
+        // Assuming your notifyRepository has a method findByDate
+        List<ReferralEntity> existingNotifyEntity = notifyRepository.findByDate(
+                Date.from(fromDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant()),
+                Date.from(toDateObj.plusDays(1).atStartOfDay().minusNanos(1).atZone(ZoneId.systemDefault()).toInstant()));
+
+        return existingNotifyEntity;
+    }
+    
+    
+    private String determineStatus(ApplicationUserEntity userEntity, ReferralEntity referral) {
+	    String status = userEntity.getStatus();
+	    if (!userEntity.getStage().equals("13")) {
+	            return "In Progress";
+	        }
+	     else if (userEntity.getStage().equals("13")) {
+	        if (backOfficeApiRepository.findByapplicationId(userEntity.getId()) != null) {
+	            return "Completed";
+	        } else {
+	            return "Submitted"; 
+	        }
+	    } else {
+	        return "Unknown"; 
+	    }
+	}
+
+
+    public String generateExcelSheet(List<MISModel> misModels) throws IOException {
+        String slash = EkycConstants.UBUNTU_FILE_SEPERATOR;
+        if (OS.contains(EkycConstants.OS_WINDOWS)) {
+            slash = EkycConstants.WINDOWS_FILE_SEPERATOR;
+        }
+        String filePath = props.getFileBasePath() + slash
+                + DateUtil.DDMMYYHHMMSS.format(DateUtil.getNewDateWithCurrentTime()) + ".xlsx";
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("MIS Report");
+
+        // Create header row with dates
+        Row headerRow = sheet.createRow(0); // Start from row index 0
+        List<String> dates = new ArrayList<>();
+        for (MISModel model : misModels) {
+            if (!dates.contains(model.getDate())) {
+                dates.add(model.getDate());
+            }
+        }
+
+        // Apply styles to header cells
+        CellStyle headerCellStyle = workbook.createCellStyle();
+        headerCellStyle.setAlignment(HorizontalAlignment.CENTER);
+        headerCellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        headerCellStyle.setFillForegroundColor(IndexedColors.LIGHT_BLUE.getIndex());
+        headerCellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        headerCellStyle.setBorderTop(BorderStyle.THIN);
+        headerCellStyle.setBorderBottom(BorderStyle.THIN);
+        headerCellStyle.setBorderLeft(BorderStyle.THIN);
+        headerCellStyle.setBorderRight(BorderStyle.THIN);
+        Font headerFont = workbook.createFont();
+        headerFont.setBold(true);
+        headerFont.setColor(IndexedColors.WHITE.getIndex()); // Set font color to white
+        headerCellStyle.setFont(headerFont);
+
+        Collections.sort(dates);
+        for (int i = 0; i < dates.size(); i++) {
+            Cell cell = headerRow.createCell(i * 3 + 1); // Start from column B (index 1)
+            cell.setCellValue(dates.get(i));
+            sheet.addMergedRegion(new CellRangeAddress(0, 0, i * 3 + 1, i * 3 + 3)); // Adjust merged region
+            cell.setCellStyle(headerCellStyle);
+        }
+
+        // Create header row with Referral Name
+        Row headerRow0 = sheet.createRow(1);
+        Cell referralHeaderCell = headerRow0.createCell(0);
+        referralHeaderCell.setCellValue("Referral Name");
+
+        // Apply styles to Referral Name header cell
+        CellStyle referralHeaderCellStyle = workbook.createCellStyle();
+        referralHeaderCellStyle.setAlignment(HorizontalAlignment.CENTER);
+        referralHeaderCellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        referralHeaderCellStyle.setFillForegroundColor(IndexedColors.LIGHT_GREEN.getIndex());
+        referralHeaderCellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        referralHeaderCellStyle.setBorderTop(BorderStyle.THIN);
+        referralHeaderCellStyle.setBorderBottom(BorderStyle.THIN);
+        referralHeaderCellStyle.setBorderLeft(BorderStyle.THIN);
+        referralHeaderCellStyle.setBorderRight(BorderStyle.THIN);
+        Font referralHeaderFont = workbook.createFont();
+        referralHeaderFont.setBold(true);
+        referralHeaderFont.setColor(IndexedColors.BLUE.getIndex()); // Set font color to white
+        referralHeaderCellStyle.setFont(referralHeaderFont);
+        referralHeaderCell.setCellStyle(referralHeaderCellStyle);
+
+        // Create second header row with "In Progress", "Submitted", "Completed"
+        CellStyle secondHeaderCellStyle = workbook.createCellStyle();
+        secondHeaderCellStyle.setAlignment(HorizontalAlignment.CENTER);
+        secondHeaderCellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        secondHeaderCellStyle.setFillForegroundColor(IndexedColors.LIGHT_GREEN.getIndex());
+        secondHeaderCellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        secondHeaderCellStyle.setBorderTop(BorderStyle.THIN);
+        secondHeaderCellStyle.setBorderBottom(BorderStyle.THIN);
+        secondHeaderCellStyle.setBorderLeft(BorderStyle.THIN);
+        secondHeaderCellStyle.setBorderRight(BorderStyle.THIN);
+        Font secondHeaderFont = workbook.createFont();
+        secondHeaderFont.setBold(true);
+        secondHeaderFont.setColor(IndexedColors.BLUE.getIndex()); // Set font color to white
+        secondHeaderCellStyle.setFont(secondHeaderFont);
+
+        for (int i = 0; i < dates.size(); i++) {
+            Cell inProgressCell = headerRow0.createCell(i * 3 + 1); // Start from column B (index 1)
+            inProgressCell.setCellValue("In Progress");
+            inProgressCell.setCellStyle(secondHeaderCellStyle);
+            Cell submittedCell = headerRow0.createCell(i * 3 + 2); // Next column (C)
+            submittedCell.setCellValue("Submitted");
+            submittedCell.setCellStyle(secondHeaderCellStyle);
+            Cell completedCell = headerRow0.createCell(i * 3 + 3); // Next column (D)
+            completedCell.setCellValue("Completed");
+            completedCell.setCellStyle(secondHeaderCellStyle);
+        }
+
+     // Create referral rows
+        Map<String, Integer> referralRowMap = new HashMap<>();
+        int rowNum = 2; // Start row index from 2 for referral data
+        CellStyle referralCellStyle = workbook.createCellStyle();
+        referralCellStyle.setAlignment(HorizontalAlignment.CENTER);
+        referralCellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        referralCellStyle.setFillForegroundColor(IndexedColors.YELLOW.getIndex());
+        referralCellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        referralCellStyle.setBorderTop(BorderStyle.THIN);
+        referralCellStyle.setBorderBottom(BorderStyle.THIN);
+        referralCellStyle.setBorderLeft(BorderStyle.THIN);
+        referralCellStyle.setBorderRight(BorderStyle.THIN);
+        Font referralFont = workbook.createFont();
+        referralFont.setColor(IndexedColors.BLACK.getIndex());
+        referralFont.setBold(true); // Set font to bold
+        referralCellStyle.setFont(referralFont);
+
+        for (MISModel model : misModels) {
+            if (!referralRowMap.containsKey(model.getReferral())) {
+                Row row = sheet.createRow(rowNum++);
+                Cell referralCell = row.createCell(0);
+                referralCell.setCellValue(model.getReferral());
+
+                // Apply styles to referral rows
+                referralCell.setCellStyle(referralCellStyle);
+
+                referralRowMap.put(model.getReferral(), row.getRowNum());
+            }
+        }
+
+        // Populate data for each referral and date
+        int lastRow = sheet.getLastRowNum();
+        int lastColumn = headerRow.getLastCellNum(); // Correctly fetch the last cell number
+
+        for (MISModel model : misModels) {
+            int rowIdx = referralRowMap.get(model.getReferral());
+            int colIdx = dates.indexOf(model.getDate()) * 3; // Adjust column index to match merged cells
+            Row row = sheet.getRow(rowIdx);
+            if (row == null) {
+                row = sheet.createRow(rowIdx);
+            }
+            Cell cellInProgress = row.createCell(colIdx + 1); // In Progress column
+            cellInProgress.setCellValue(model.getTotalAccOpen());
+            Cell cellSubmitted = row.createCell(colIdx + 2); // Submitted column
+            cellSubmitted.setCellValue(model.getTotalAccEsign());
+            Cell cellCompleted = row.createCell(colIdx + 3); // Completed column
+            cellCompleted.setCellValue(model.getTotalAccBo());
+
+            // Apply styles to data cells
+            CellStyle dataCellStyle = workbook.createCellStyle();
+            dataCellStyle.setAlignment(HorizontalAlignment.CENTER);
+            dataCellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+            dataCellStyle.setBorderTop(BorderStyle.THIN);
+            dataCellStyle.setBorderBottom(BorderStyle.THIN);
+            dataCellStyle.setBorderLeft(BorderStyle.THIN);
+            dataCellStyle.setBorderRight(BorderStyle.THIN);
+            Font dataFont = workbook.createFont();
+            dataFont.setColor(IndexedColors.BLACK.getIndex());
+            dataFont.setBold(true); // Set font to bold
+            dataCellStyle.setFont(dataFont);
+            
+            cellInProgress.setCellStyle(dataCellStyle);
+            cellSubmitted.setCellStyle(dataCellStyle);
+            cellCompleted.setCellStyle(dataCellStyle);
+        }
+
+
+        // Apply styles to data cells
+        CellStyle dataCellStyle = workbook.createCellStyle();
+        dataCellStyle.setAlignment(HorizontalAlignment.CENTER);
+        dataCellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+
+        // Apply borders to all cells
+        dataCellStyle.setBorderTop(BorderStyle.THIN);
+        dataCellStyle.setBorderBottom(BorderStyle.THIN);
+        dataCellStyle.setBorderLeft(BorderStyle.THIN);
+        dataCellStyle.setBorderRight(BorderStyle.THIN);
+
+        // Apply font color
+        Font dataFont = workbook.createFont();
+        dataFont.setColor(IndexedColors.BLACK.getIndex());
+        dataFont.setBold(true); // Set font to bold
+        dataCellStyle.setFont(dataFont);
+
+     // Iterate over all rows and cells to apply the style
+        for (int i = 2; i <= lastRow; i++) {
+            Row row = sheet.getRow(i);
+            if (row == null) {
+                row = sheet.createRow(i);
+            }
+            for (int j = 0; j <= lastColumn+1; j++) { // Adjusted loop condition to include the last column
+                Cell cell = row.getCell(j);
+                if (cell == null) {
+                    cell = row.createCell(j);
+                }
+                cell.setCellStyle(dataCellStyle);
+
+                // Fill empty cells with "0"
+                if (cell.getCellType() == CellType.BLANK || cell.getStringCellValue().isEmpty()) {
+                    cell.setCellValue(0);
+                }
+            }
+        }
+
+        // Auto-size columns
+        for (int i = 0; i < lastColumn; i++) { // Adjusted loop condition
+            sheet.autoSizeColumn(i);
+        }
+
+        // Write the output to a file
+        FileOutputStream fileOut = new FileOutputStream(filePath);
+        workbook.write(fileOut);
+        // Close the output stream
+        fileOut.close();
+
+        // Close the workbook to release resources
+        workbook.close();
+
+        return filePath;
+    }
+
+    
+    
 	public String generateExcelSheet1(List<MISModel> misModels, List<String> refByNames) {
 		String slash = EkycConstants.UBUNTU_FILE_SEPERATOR;
 		if (OS.contains(EkycConstants.OS_WINDOWS)) {

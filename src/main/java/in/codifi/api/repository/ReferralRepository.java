@@ -17,11 +17,11 @@ public interface ReferralRepository extends JpaRepository<ReferralEntity, Long> 
 
 	List<ReferralEntity> findByReferralBy(String referralBy);
 	
-	@Query("SELECT DISTINCT ce.refByName FROM tbl_referral_details ce WHERE ce.createdOn BETWEEN :fromDateTime AND :toDateTime")
-	List<String> findByDate(
+	  @Query("SELECT  ce  FROM tbl_referral_details ce WHERE ce.createdOn BETWEEN :fromDateTime AND :toDateTime")
+	    List<ReferralEntity> findByDate(
 	        @Param("fromDateTime") Date fromDateTime,
 	        @Param("toDateTime") Date toDateTime
-	);
+	    );
 	
 	@Query("SELECT COUNT(ce) FROM tbl_referral_details ce WHERE ce.createdOn BETWEEN :fromDateTime AND :toDateTime AND ce.refByName = :refByName")
     long getCountForReferralAndDateRange(
@@ -29,5 +29,5 @@ public interface ReferralRepository extends JpaRepository<ReferralEntity, Long> 
         @Param("fromDateTime") Date fromDateTime,
         @Param("toDateTime") Date toDateTime
     );
-	
+	   
 }
