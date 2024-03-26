@@ -57,4 +57,8 @@ public class ApplicationProperties {
 	String backofficeApi;
 	@ConfigProperty(name = "appconfig.backoffice.key")
 	String backofficeKey;
+	
+	//Bo
+	@ConfigProperty(name = "appconfig.bo.token")
+	String boAuthToken;
 }
